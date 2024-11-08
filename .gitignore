@@ -1,0 +1,14 @@
+
+.venv/
+dist/
+.DS_Store
+.env
+*.pyc
+
+.env.integration
+
+.coverage
+
+.imports/
+
+.env.*

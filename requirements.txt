@@ -1,0 +1,5 @@
+boto3
+requests
+python-dotenv # load env values
+PyJWT
+aws_lambda_powertools
