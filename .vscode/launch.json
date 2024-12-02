@@ -34,14 +34,14 @@
             "name": "Run Integration Tests - dev",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/src/aplos_nca_saas_toolkit/integration_testing/main.py",
+            "program": "${workspaceFolder}/src/aplos_nca_saas_sdk/integration_testing/main.py",
             "console": "integratedTerminal",
             "env": {
                 
                 "ENVRIONMENT": "dev",
                 "ENV_FILE": ".env.development",
                 "DEBUG_MODE": "True",
-                "PYTHONPATH": "${workspaceFolder}:${workspaceFolder}/src:${workspaceFolder}/devops:${workspaceFolder}/devops/onboarding"                                           
+                "PYTHONPATH": "${workspaceFolder}:${workspaceFolder}/src:${workspaceFolder}/devops:${workspaceFolder}/devops"                                           
             }
         },
         

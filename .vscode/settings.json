@@ -12,7 +12,7 @@
     "python.testing.cwd": "${workspaceFolder}",
     "python.analysis.extraPaths": [                
         "${workspaceFolder}/src",
-        "${workspaceFolder}/src/aplos_nca_saas_automation",        
+        "${workspaceFolder}/src/aplos_nca_saas_sdk",        
         "${workspaceFolder}/tests",
         "${workspaceFolder}/devops",
         "${workspaceFolder}/devops/cdk",
