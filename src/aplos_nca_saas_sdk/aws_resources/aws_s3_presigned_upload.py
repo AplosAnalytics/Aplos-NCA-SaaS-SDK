@@ -6,10 +6,10 @@ import json
 import os
 
 import requests
-from aplos_nca_saas_toolkit.aws_resources.aws_s3_presigned_payload import (
+from aplos_nca_saas_sdk.aws_resources.aws_s3_presigned_payload import (
     S3PresignedPayload,
 )
-from aplos_nca_saas_toolkit.utilities.http_utility import HttpUtilities, Routes
+from aplos_nca_saas_sdk.utilities.http_utility import HttpUtilities, Routes
 
 
 class S3PresignedUpload:

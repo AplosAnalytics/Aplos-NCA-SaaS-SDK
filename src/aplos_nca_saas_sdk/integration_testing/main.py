@@ -9,8 +9,8 @@ recording or otherwise) without prior written permission from Aplos Analytices, 
 """
 
 import os
-from aplos_nca_saas_toolkit.utilities.environment_services import EnvironmentServices
-from aplos_nca_saas_toolkit.integration_testing.integration_test_suite import (
+from aplos_nca_saas_sdk.utilities.environment_services import EnvironmentServices
+from aplos_nca_saas_sdk.integration_testing.integration_test_suite import (
     IntegrationTestSuite,
 )
 

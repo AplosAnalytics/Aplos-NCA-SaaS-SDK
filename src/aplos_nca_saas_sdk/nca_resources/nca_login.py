@@ -1,4 +1,4 @@
-from aplos_nca_saas_toolkit.aws_resources.aws_cognito import CognitoAuthenication
+from aplos_nca_saas_sdk.aws_resources.aws_cognito import CognitoAuthenication
 
 
 class NCALogin:

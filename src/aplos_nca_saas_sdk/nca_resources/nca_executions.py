@@ -6,15 +6,15 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import requests
-from aplos_nca_saas_toolkit.aws_resources.aws_cognito import CognitoAuthenication
-from aplos_nca_saas_toolkit.aws_resources.aws_s3_presigned_payload import (
+from aplos_nca_saas_sdk.aws_resources.aws_cognito import CognitoAuthenication
+from aplos_nca_saas_sdk.aws_resources.aws_s3_presigned_payload import (
     S3PresignedPayload,
 )
-from aplos_nca_saas_toolkit.aws_resources.aws_s3_presigned_upload import (
+from aplos_nca_saas_sdk.aws_resources.aws_s3_presigned_upload import (
     S3PresignedUpload,
 )
-from aplos_nca_saas_toolkit.utilities.commandline_args import CommandlineArgs
-from aplos_nca_saas_toolkit.utilities.http_utility import HttpUtilities, Routes
+from aplos_nca_saas_sdk.utilities.commandline_args import CommandlineArgs
+from aplos_nca_saas_sdk.utilities.http_utility import HttpUtilities, Routes
 
 
 class NCAEngine:

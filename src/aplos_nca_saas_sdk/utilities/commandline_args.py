@@ -3,7 +3,7 @@ import argparse
 import getpass
 from pathlib import Path
 from typing import List
-from aplos_nca_saas_toolkit.utilities.environment_vars import EnvironmentVars
+from aplos_nca_saas_sdk.utilities.environment_vars import EnvironmentVars
 from dotenv import load_dotenv
 
 # load the environment (.env) file if any

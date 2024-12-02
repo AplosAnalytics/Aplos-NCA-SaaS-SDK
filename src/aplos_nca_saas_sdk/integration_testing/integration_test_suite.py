@@ -8,13 +8,13 @@ in any form or by any means (electronic, mechanical, photocopying,
 recording or otherwise) without prior written permission from Aplos Analytices, Inc.
 """
 
-from aplos_nca_saas_toolkit.integration_testing.tests.test_app_configuration import (
+from aplos_nca_saas_sdk.integration_testing.tests.test_app_configuration import (
     TestAppConfiguration,
 )
-from aplos_nca_saas_toolkit.integration_testing.tests.test_app_login import (
+from aplos_nca_saas_sdk.integration_testing.tests.test_app_login import (
     TestAppLogin,
 )
-from aplos_nca_saas_toolkit.utilities.environment_vars import EnvironmentVars
+from aplos_nca_saas_sdk.utilities.environment_vars import EnvironmentVars
 
 
 class IntegrationTestSuite:

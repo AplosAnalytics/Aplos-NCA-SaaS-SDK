@@ -1,6 +1,5 @@
-import requests
-from aplos_nca_saas_toolkit.nca_resources.nca_login import NCALogin
-from aplos_nca_saas_toolkit.utilities.environment_vars import EnvironmentVars
+from aplos_nca_saas_sdk.nca_resources.nca_login import NCALogin
+from aplos_nca_saas_sdk.utilities.environment_vars import EnvironmentVars
 
 
 class TestAppLogin:
