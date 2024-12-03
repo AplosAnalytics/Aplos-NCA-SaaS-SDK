@@ -1,14 +1,18 @@
 import requests
+from aplos_nca_saas_sdk.integration_testing.integration_test_base import (
+    IntegrationTestBase,
+)
 
 
-class TestAppConfiguration:
+class TestAppConfiguration(IntegrationTestBase):
     """Application Configuration Tests"""
 
     def __init__(self):
-        pass
+        super().__init__(name="app_configuration")
 
-    def test(self, app_api_domain: str) -> dict:
+    def test(self) -> dict:
         """Test loading the application configuration"""
+        app_api_domain = self.env_vars.api_domain
         url = f"https://{app_api_domain}/app/configuration"
 
         response = requests.get(url, timeout=30)

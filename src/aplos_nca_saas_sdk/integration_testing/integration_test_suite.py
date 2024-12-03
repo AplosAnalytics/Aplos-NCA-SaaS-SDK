@@ -8,13 +8,12 @@ in any form or by any means (electronic, mechanical, photocopying,
 recording or otherwise) without prior written permission from Aplos Analytices, Inc.
 """
 
-from aplos_nca_saas_sdk.integration_testing.tests.test_app_configuration import (
-    TestAppConfiguration,
+from aplos_nca_saas_sdk.integration_testing.integration_test_factory import (
+    IntegrationTestFactory,
 )
-from aplos_nca_saas_sdk.integration_testing.tests.test_app_login import (
-    TestAppLogin,
+from aplos_nca_saas_sdk.integration_testing.integration_test_base import (
+    IntegrationTestBase,
 )
-from aplos_nca_saas_sdk.utilities.environment_vars import EnvironmentVars
 
 
 class IntegrationTestSuite:
@@ -23,16 +22,12 @@ class IntegrationTestSuite:
     def __init__(self):
         pass
 
-    def test(self, app_api_domain: str | None = None):
+    def test(self):
         """Run a full suite of integration tests"""
-        env_vars: EnvironmentVars = EnvironmentVars()
-        app_api_domain = app_api_domain or env_vars.api_domain
 
-        if not app_api_domain:
-            raise RuntimeError("APLOS_API_DOMAIN environment variable is not set.")
-
-        app_config_test = TestAppConfiguration()
-        config = app_config_test.test(app_api_domain=app_api_domain)
-
-        tal: TestAppLogin = TestAppLogin()
-        tal.test(env_vars=env_vars)
+        factory: IntegrationTestFactory = IntegrationTestFactory()
+        test_class: IntegrationTestBase | None = None
+        for test_class in factory.test_classes:
+            test_instance: IntegrationTestBase = test_class()
+            print(f"Running test class {test_instance.name}")
+            test_instance.test()
