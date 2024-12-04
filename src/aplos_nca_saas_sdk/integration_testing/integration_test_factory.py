@@ -2,10 +2,6 @@
 Copyright 2024 Aplos Analytics
 All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
 Property of Aplos Analytics, Utah, USA
-
-No part of this publication may be reproduced, stored or transmitted,
-in any form or by any means (electronic, mechanical, photocopying,
-recording or otherwise) without prior written permission from Aplos Analytices, Inc.
 """
 
 import os
@@ -19,6 +15,11 @@ from aplos_nca_saas_sdk.integration_testing.integration_test_base import (
 
 
 class IntegrationTestFactory:
+    """
+    Integration Test Factory
+    Loads all the integration tests from the tests directory and registers them for execution
+    """
+
     def __init__(self):
         self.__test_classes: List[IntegrationTestBase] = []
         self.__load_all_classes()
@@ -47,13 +48,13 @@ class IntegrationTestFactory:
                     issubclass(obj, IntegrationTestBase)
                     and obj is not IntegrationTestBase
                 ):
-                    # Instantiate the class
-                    print(f"registring test class {name}")
-                    self.register_test_class(obj)
+                    # Instantiate the class and store it
+                    self.register_test_class(obj())
 
     @property
     def test_classes(self) -> List[IntegrationTestBase]:
         """Get the test classes"""
+        self.__test_classes.sort(key=lambda x: x.index)
         return self.__test_classes
 
     def register_test_class(self, test_class: IntegrationTestBase):

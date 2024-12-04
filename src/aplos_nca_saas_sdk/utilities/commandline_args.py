@@ -271,7 +271,7 @@ class CommandlineArgs:
         paths: List[str] = []
         for parent in range(parents):
             path = Path(starting_path).parents[parent].absolute()
-            print(f"searching: {path}")
+
             tmp = os.path.join(path, file_name)
             paths.append(tmp)
             if os.path.exists(tmp):

@@ -1,23 +1,93 @@
+"""
+Copyright 2024 Aplos Analytics
+All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
+Property of Aplos Analytics, Utah, USA
+"""
+
 import boto3
 import jwt as jwt_lib
+from typing import Optional
+from aplos_nca_saas_sdk.nca_resources.nca_app_configuration import (
+    NCAAppConfiguration,
+)
 
 
 class CognitoAuthenication:
-    def __init__(self, client_id: str | None, region: str | None) -> None:
-        # setup the client id
-        self.client_id: str | None = client_id
-        self.__jwt: str | None = None
-        self.__access_token: str | None = None
-        self.__refresh_token: str | None = None
-        self.region: str = region or "us-east-1"
-        self.client = boto3.client("cognito-idp", region_name=region)
-        self.__user_id: str | None = None
-        self.__tenant_id: str | None = None
+    """
+    Cognito Authentication
 
-        if self.client_id is None:
+    """
+
+    def __init__(
+        self,
+        *,
+        client_id: Optional[str] = None,
+        region: Optional[str] = None,
+        aplos_domain: Optional[str] = None,
+    ) -> None:
+        # setup the client id
+        self.__client_id: Optional[str] = client_id
+        self.__jwt: Optional[str] = None
+        self.__access_token: Optional[str] = None
+        self.__refresh_token: Optional[str] = None
+        self.__region: str = region or "us-east-1"
+        self.__client: Optional[boto3.client] = None
+        self.__user_id: Optional[str] = None
+        self.__tenant_id: Optional[str] = None
+        self.__config: Optional[NCAAppConfiguration] = None
+        self.__aplos_domain: Optional[str] = aplos_domain
+
+        self.__validate_parameters()
+
+    @property
+    def client(self) -> boto3.client:
+        """
+        Get the boto3 client
+
+        Returns:
+            boto3.client: the boto3 client
+        """
+        if self.__client is None:
+            self.__client = boto3.client("cognito-idp", region_name=self.region)
+
+        return self.__client
+
+    @property
+    def client_id(self) -> str:
+        """
+        Client Id
+        Returns:
+            str: the client id
+        """
+        return self.__client_id
+
+    @property
+    def region(self) -> str:
+        """
+        Region
+        Returns:
+            str: the region
+        """
+        return self.__region
+
+    def __validate_parameters(self) -> None:
+        if self.__client_id is None and self.__aplos_domain is not None:
+            self.__config = NCAAppConfiguration(aplos_saas_domain=self.__aplos_domain)
+            self.__client_id = self.__config.cognito_client_id
+            self.__region = self.__config.cognito_region
+
+        if self.__client_id is None:
             raise RuntimeError(
                 "Missing Cognito Client Id. "
-                "Pass in a client_id as a command arg or set the COGNITO_CLIENT_ID enviornment var"
+                "Pass in a client_id as a command arg or set the COGNITO_CLIENT_ID enviornment var. "
+                "Alternatively, set the aplos_domain to automatically get the client_id and region."
+            )
+
+        if self.__region is None:
+            raise RuntimeError(
+                "Missing Cognito Region"
+                "Pass in a region as a command arg or set the COGNITO_REGION enviornment var. "
+                "Alternatively, set the aplos_domain to automatically get the client_id and region."
             )
 
     def login(self, username: str, password: str) -> str:
@@ -76,7 +146,6 @@ class CognitoAuthenication:
         )
         self.__user_id = decoded_jwt.get("custom:aplos_user_id")
         self.__tenant_id = decoded_jwt.get("custom:aplos_user_tenant_id")
-        print(decoded_jwt)
 
     @property
     def jwt(self) -> str:

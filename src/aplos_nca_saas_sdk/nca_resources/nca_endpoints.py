@@ -1,6 +1,15 @@
+"""
+Copyright 2024 Aplos Analytics
+All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
+Property of Aplos Analytics, Utah, USA
+"""
+
+
 class NCAEndpoints:
-    def __init__(self, domain: str):
-        self.__domain: str = domain
+    """Aplos NCA SaaS Endpoints"""
+
+    def __init__(self, *, aplos_saas_domain: str):
+        self.__domain: str = aplos_saas_domain
         self.__protocal: str = "https://"
 
     def __base(self, tenant_id: str | None = None, user_id: str | None = None) -> str:

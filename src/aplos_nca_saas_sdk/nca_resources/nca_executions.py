@@ -1,3 +1,9 @@
+"""
+Copyright 2024 Aplos Analytics
+All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
+Property of Aplos Analytics, Utah, USA
+"""
+
 import json
 import os
 import time
@@ -27,6 +33,7 @@ class NCAEngine:
         self.access_token: str | None = None
         self.refresh_token: str | None = None
         self.__api_domain: str | None = api_domain
+        self.verbose: bool = False
 
         self.cognito: CognitoAuthenication = CognitoAuthenication(
             client_id=cognito_client_id, region=region
@@ -73,15 +80,17 @@ class NCAEngine:
             output_directory (str, optional): the output directory. Defaults to None (the local directy is used)
             unzip_after_download (bool): Results are downloaded as a zip file, this option will unzip them automatically.  Defaults to False
         """
-
-        print("\tLogging in.")
+        if self.verbose:
+            print("\tLogging in.")
         self.jwt = self.cognito.login(username=username, password=password)
 
-        print("\tUploading the analysis file.")
+        if self.verbose:
+            print("\tUploading the analysis file.")
         uploader: S3PresignedUpload = S3PresignedUpload(self.jwt, str(self.api_root))
         presign_payload: S3PresignedPayload = uploader.upload_file(input_file_path)
 
-        print("\tStarting the execution.")
+        if self.verbose:
+            print("\tStarting the execution.")
         execution_id = self.run_analysis(
             file_id=str(presign_payload.file_id),
             config_data=config_data,
@@ -93,7 +102,8 @@ class NCAEngine:
             download_url = self.wait_for_results(execution_id=execution_id)
             # download the files
             if download_url:
-                print("\tDownloading the results.")
+                if self.verbose:
+                    print("\tDownloading the results.")
                 self.download_file(
                     download_url,
                     output_directory=output_directory,
@@ -147,12 +157,13 @@ class NCAEngine:
             )
 
         execution_id = str(json_response.get("execution_id"))
-        print(f"\tExecution {execution_id} started.")
+        if self.verbose:
+            print(f"\tExecution {execution_id} started.")
 
         return execution_id
 
     def wait_for_results(
-        self, execution_id: str, max_wait_in_minutes: int = 5
+        self, execution_id: str, max_wait_in_minutes: int = 15
     ) -> str | None:
         """
         Wait for results
@@ -185,7 +196,8 @@ class NCAEngine:
             if status == "failed" or complete:
                 break
             if not complete:
-                print(f"\t\twaiting for results.... {status}: {elapsed}")
+                if self.verbose:
+                    print(f"\t\twaiting for results.... {status}: {elapsed}")
                 time.sleep(5)
             if datetime.now() > max_time:
                 status = "timeout"
@@ -196,13 +208,15 @@ class NCAEngine:
                 break
 
         if status == "complete":
-            print("\tExecution complete.")
-            print(f"\tExecution duration = {elapsed}.")
+            if self.verbose:
+                print("\tExecution complete.")
+                print(f"\tExecution duration = {elapsed}.")
             return json_response["presigned"]["url"]
         else:
-            print(
-                f"\tExecution failed. Execution ID = {execution_id}. reason: {json_response.get('errors')}"
-            )
+            if self.verbose:
+                print(
+                    f"\tExecution failed. Execution ID = {execution_id}. reason: {json_response.get('errors')}"
+                )
             return None
 
     def download_file(
@@ -244,8 +258,9 @@ class NCAEngine:
 
             unzipped_state = "and unzipped" if do_unzip else "in zip format"
 
-            print(f"\tResults file downloaded {unzipped_state}.")
-            print(f"\t\tResults are available in: {output_directory}")
+            if self.verbose:
+                print(f"\tResults file downloaded {unzipped_state}.")
+                print(f"\t\tResults are available in: {output_directory}")
 
             return output_directory
         else:

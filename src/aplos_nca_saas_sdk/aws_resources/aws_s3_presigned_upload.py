@@ -1,5 +1,7 @@
 """
-Aplos Analytics
+Copyright 2024 Aplos Analytics
+All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
+Property of Aplos Analytics, Utah, USA
 """
 
 import json
@@ -105,7 +107,6 @@ class S3PresignedUpload:
 
         # Check the response: 204 is a success in this case
         if upload_response and upload_response.status_code == 204:
-            print("\tFile uploaded successfully.")
             return True
         else:
             raise RuntimeError(

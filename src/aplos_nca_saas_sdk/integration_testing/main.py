@@ -2,10 +2,6 @@
 Copyright 2024 Aplos Analytics
 All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
 Property of Aplos Analytics, Utah, USA
-
-No part of this publication may be reproduced, stored or transmitted,
-in any form or by any means (electronic, mechanical, photocopying,
-recording or otherwise) without prior written permission from Aplos Analytices, Inc.
 """
 
 import os

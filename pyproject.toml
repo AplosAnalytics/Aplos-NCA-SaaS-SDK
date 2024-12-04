@@ -3,16 +3,16 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/aplos_nca_saas_toolkit"]
+packages = ["src/aplos_nca_saas_sdk"]
 
 [project]
-name = "aplos_nca_saas_toolkit"
-source = "src/aplos_nca_saas_toolkit"
-version = "1.0.1"
+name = "aplos_nca_saas_sdk"
+source = "src/aplos_nca_saas_sdk"
+version = "1.0.0"
 authors = [
   { name="Eric Wilson", email="eric.wilson@aplosanalytics.com" }
 ]
-description = "Aplos NCA SaaS Toolkit"
+description = "Aplos NCA SaaS SDK"
 readme = "README.md"
 requires-python = ">=3.10"
 classifiers = [

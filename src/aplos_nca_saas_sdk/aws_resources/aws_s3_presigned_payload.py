@@ -1,20 +1,22 @@
 """
-Aplos Analytics
+Copyright 2024 Aplos Analytics
+All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
+Property of Aplos Analytics, Utah, USA
 """
 
+
 class S3PresignedPayload:
-    """ S3PresignedPayload """
+    """S3PresignedPayload"""
+
     def __init__(self, payload: dict | None = None) -> None:
-       
         self.url: str | None = None
-        self.form_data: dict = {}        
+        self.form_data: dict = {}
         self.raw_payload: dict | None = payload
         self.file_id: str | None = None
         if payload:
             self.__load(payload)
 
     def __load(self, payload: dict):
-
         if "presigned" not in payload:
             raise KeyError("Missing key 'presigned' in response payload.")
         self.url = payload["presigned"]["url"]
