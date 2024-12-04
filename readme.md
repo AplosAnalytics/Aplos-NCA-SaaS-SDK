@@ -23,7 +23,7 @@ All the source code can be downloaded from our [docs repo](https://github.com/Ap
 > onboarding or with a "forgot password" request and reset.
 
 ### Access your settings from the UI
-![API Configuration](/docs/samples/images/API_Configuration_blur.png)
+![API Configuration](/docs/images/API_Configuration_blur.png)
 
 
 ## Python Environment
@@ -176,4 +176,4 @@ COGNITO_REGION="<region>"
 ## The Command Line in Action
 In this example, I have all my settings preloaded in environment vars and I just hit enter several times to accept the defaults.
 
-![Commandline App](/docs/samples/python/aplos_nca/images/aplos-nca-commandline-cropped.png)
+![Commandline App](/docs/images/aplos-nca-commandline-cropped.png)
