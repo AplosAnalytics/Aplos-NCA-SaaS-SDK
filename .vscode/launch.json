@@ -18,7 +18,15 @@
             }
         },
         {
-            "name": "Build & Deploy Artifacts",
+            "name": "Build & Deploy To PyPi",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/devops/pypi/build.py",
+            "console": "integratedTerminal"
+        },
+
+        {
+            "name": "Build & Deploy To Code Artifacts",
             "type": "debugpy",
             "request": "launch",
             "program": "${workspaceFolder}/devops/code_artifacts/main.py",

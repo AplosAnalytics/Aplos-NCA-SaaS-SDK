@@ -42,7 +42,7 @@ class IntegrationTestFactory:
             module = importlib.import_module(module_name)
 
             # Iterate over all attributes in the module
-            for name, obj in inspect.getmembers(module, inspect.isclass):
+            for _, obj in inspect.getmembers(module, inspect.isclass):
                 # Check if the class inherits from the specified base class
                 if (
                     issubclass(obj, IntegrationTestBase)

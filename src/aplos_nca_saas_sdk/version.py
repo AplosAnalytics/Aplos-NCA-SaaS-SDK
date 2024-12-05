@@ -1,7 +1,4 @@
-"""
-Copyright 2024 Aplos Analytics
-All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
-Property of Aplos Analytics, Utah, USA
-"""
-
-__version__ = "1.0.0"
+# Aplos NCA SaaS SDK Version File
+# This is automatically generated during the build process. 
+# DO NOT UPDATE IT DIRECTLY. IT WILL BE OVERWRITTEN. 
+__version__ = '0.0.1'

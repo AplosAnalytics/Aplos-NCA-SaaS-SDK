@@ -5,10 +5,9 @@ dist/
 .env
 *.pyc
 
-.env.integration
-
 .coverage
 
 .imports/
-
+# don't track environment files
+.env
 .env.*
