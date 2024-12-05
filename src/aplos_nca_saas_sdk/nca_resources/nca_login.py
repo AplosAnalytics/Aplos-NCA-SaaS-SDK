@@ -59,7 +59,7 @@ class NCALogin:
         return self.__cognito
 
     @property
-    def domain(self) -> str:
+    def domain(self) -> str | None:
         """
         Domain
         Returns:

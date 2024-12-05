@@ -11,6 +11,10 @@ from aplos_nca_saas_sdk.integration_testing.integration_test_base import (
     IntegrationTestBase,
 )
 
+from aplos_nca_saas_sdk.integration_testing.integration_test_response import (
+    IntegrationTestResponse,
+)
+
 
 class TestAppConfiguration(IntegrationTestBase):
     """Application Configuration Tests"""
@@ -18,13 +22,22 @@ class TestAppConfiguration(IntegrationTestBase):
     def __init__(self):
         super().__init__(name="app_configuration")
 
-    def test(self) -> dict:
+    def test(self) -> bool:
         """Test loading the application configuration"""
 
-        config: NCAAppConfiguration = NCAAppConfiguration(self.env_vars.api_domain)
-        response = config.get()
+        self.results.clear()
+        for domain in self.config.app_config.domains:
+            config: NCAAppConfiguration = NCAAppConfiguration(domain)
 
-        if response.status_code != 200:
-            raise RuntimeError("App configuration url is not working.")
+            test_response: IntegrationTestResponse = IntegrationTestResponse()
+            test_response.meta = {"domain": domain}
+            try:
+                response = config.get()
+                test_response.response = response
+                test_response.success = True
+            except Exception as e:  # pylint: disable=W0718
+                test_response.error = str(e)
 
-        return response.json()
+            self.results.append(test_response)
+
+        return self.success()

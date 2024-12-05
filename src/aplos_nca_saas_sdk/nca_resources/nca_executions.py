@@ -48,6 +48,9 @@ class NCAEngine:
     @property
     def api_root(self) -> str:
         """Gets the base url"""
+        if self.__api_domain is None:
+            raise RuntimeError("Missing Aplos Api Domain")
+
         url = HttpUtilities.build_url(self.__api_domain)
         if isinstance(url, str):
             return (

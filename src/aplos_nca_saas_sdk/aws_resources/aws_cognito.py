@@ -4,9 +4,11 @@ All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
 Property of Aplos Analytics, Utah, USA
 """
 
+from typing import Optional
+
 import boto3
 import jwt as jwt_lib
-from typing import Optional
+from mypy_boto3_cognito_idp.client import CognitoIdentityProviderClient
 from aplos_nca_saas_sdk.nca_resources.nca_app_configuration import (
     NCAAppConfiguration,
 )
@@ -31,7 +33,7 @@ class CognitoAuthenication:
         self.__access_token: Optional[str] = None
         self.__refresh_token: Optional[str] = None
         self.__region: str = region or "us-east-1"
-        self.__client: Optional[boto3.client] = None
+        self.__client: Optional[CognitoIdentityProviderClient] = None
         self.__user_id: Optional[str] = None
         self.__tenant_id: Optional[str] = None
         self.__config: Optional[NCAAppConfiguration] = None
@@ -40,7 +42,7 @@ class CognitoAuthenication:
         self.__validate_parameters()
 
     @property
-    def client(self) -> boto3.client:
+    def client(self) -> CognitoIdentityProviderClient:
         """
         Get the boto3 client
 
@@ -53,7 +55,7 @@ class CognitoAuthenication:
         return self.__client
 
     @property
-    def client_id(self) -> str:
+    def client_id(self) -> str | None:
         """
         Client Id
         Returns:
@@ -62,7 +64,7 @@ class CognitoAuthenication:
         return self.__client_id
 
     @property
-    def region(self) -> str:
+    def region(self) -> str | None:
         """
         Region
         Returns:

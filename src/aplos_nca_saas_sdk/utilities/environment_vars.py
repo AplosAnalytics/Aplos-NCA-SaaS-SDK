@@ -6,7 +6,7 @@ class EnvironmentVars:
 
     def __init__(self) -> None:
         # load defaults
-        self.api_domain = os.getenv("APLOS_API_DOMAIN")
+        self.api_domain = os.getenv("APLOS_API_DOMAIN", "")
 
         self.aws_region = os.getenv("COGNITO_REGION")
         self.client_id = os.getenv("COGNITO_CLIENT_ID")
@@ -17,7 +17,7 @@ class EnvironmentVars:
         self.metadata_file = os.getenv("METADATA_FILE")
         self.analysis_file = os.getenv("ANALYSIS_FILE")
 
-        if "https://" in self.api_domain:
+        if self.api_domain is not None and "https://" in self.api_domain:
             self.api_domain = self.api_domain.replace("https://", "")
 
         self.aplos_api_url = f"https://{self.api_domain}"

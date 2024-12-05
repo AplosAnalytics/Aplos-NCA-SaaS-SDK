@@ -4,9 +4,12 @@ All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
 Property of Aplos Analytics, Utah, USA
 """
 
-from typing import Dict, Any
-from aplos_nca_saas_sdk.utilities.environment_vars import EnvironmentVars
-from aplos_nca_saas_sdk.nca_resources.nca_endpoints import NCAEndpoints
+from typing import Dict, Any, List
+
+from aplos_nca_saas_sdk.integration_testing.configs.config import TestConfiguration
+from aplos_nca_saas_sdk.integration_testing.integration_test_response import (
+    IntegrationTestResponse,
+)
 
 
 class IntegrationTestBase:
@@ -14,21 +17,52 @@ class IntegrationTestBase:
     Integration Test Base Class
     """
 
-    def __init__(self, name: str, index: int = 0):
+    def __init__(self, name: str | None = None, index: int = 0):
         self.name = name
         self.index = index
-        self.env_vars: EnvironmentVars = EnvironmentVars()
+        self.__config: TestConfiguration | None = None
+        self.__results: List[IntegrationTestResponse] = []
 
-        if not self.env_vars.api_domain:
+    @property
+    def config(self) -> TestConfiguration:
+        """
+        Get the configuration for the test
+        """
+        if self.__config is None:
             raise RuntimeError(
-                "APLOS_API_DOMAIN environment variable is not set. "
-                "This is required to run the tests"
+                "Test configuration not set. "
+                "A configuration is required to run integration tests."
             )
+        return self.__config
 
-        self.endpoints: NCAEndpoints = NCAEndpoints(
-            aplos_saas_domain=self.env_vars.api_domain,
-        )
+    @config.setter
+    def config(self, value: TestConfiguration):
+        """
+        Set the configuration for the test
+        """
+        self.__config = value
 
-    def test(self) -> Dict[str, Any] | None:
-        """Run the Test"""
+    @property
+    def results(self) -> List[IntegrationTestResponse]:
+        """
+        Get the results of the test
+        """
+        return self.__results
+
+    def success(self) -> bool:
+        """
+        Returns True if all tests in the suite were successful
+        """
+        return all([result.success for result in self.results])
+
+    def test(self) -> bool:
+        """
+        Run the Test
+        Args:
+            config: The Test Configuration
+        Returns:
+            True if the test was successful, False otherwise.  If any
+            of the tests fail, it will be false.  Execeptions are only
+            raised if the raise_on_failure flag is set to True.
+        """
         raise RuntimeError("This should be implemented by the subclass.")
