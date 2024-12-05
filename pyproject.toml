@@ -8,17 +8,23 @@ packages = ["src/aplos_nca_saas_sdk"]
 [project]
 name = "aplos_nca_saas_sdk"
 source = "src/aplos_nca_saas_sdk"
-version = "0.0.1"
+version = "0.0.2"
 authors = [
   { name="Eric Wilson", email="eric.wilson@aplosanalytics.com" }
 ]
 description = "Aplos NCA SaaS SDK"
 readme = "README.md"
+license = {text = "MIT License"}
+
 requires-python = ">=3.10"
 classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries",
+    
 ]
 
 dependencies = [
@@ -28,3 +34,9 @@ dependencies = [
   "python-dotenv==1.0.1",
   "PyJWT==2.9.0"
 ]
+
+[project.urls]
+Homepage = "https://aplosanalytics.com/"
+Documentation = "https://docs.aplosanalytics.com/"
+Repository = "https://github.com/AplosAnalytics/Aplos-NCA-SaaS-SDK"
+Issues = "https://github.com/AplosAnalytics/Aplos-NCA-SaaS-SDK/issues"
