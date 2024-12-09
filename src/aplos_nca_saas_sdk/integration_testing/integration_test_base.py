@@ -5,6 +5,7 @@ Property of Aplos Analytics, Utah, USA
 """
 
 from typing import Dict, Any, List
+from abc import ABC, abstractmethod
 
 from aplos_nca_saas_sdk.integration_testing.configs.config import TestConfiguration
 from aplos_nca_saas_sdk.integration_testing.integration_test_response import (
@@ -12,7 +13,7 @@ from aplos_nca_saas_sdk.integration_testing.integration_test_response import (
 )
 
 
-class IntegrationTestBase:
+class IntegrationTestBase(ABC):
     """
     Integration Test Base Class
     """
@@ -55,6 +56,7 @@ class IntegrationTestBase:
         """
         return all([result.success for result in self.results])
 
+    @abstractmethod
     def test(self) -> bool:
         """
         Run the Test
@@ -65,4 +67,4 @@ class IntegrationTestBase:
             of the tests fail, it will be false.  Execeptions are only
             raised if the raise_on_failure flag is set to True.
         """
-        raise RuntimeError("This should be implemented by the subclass.")
+        pass
