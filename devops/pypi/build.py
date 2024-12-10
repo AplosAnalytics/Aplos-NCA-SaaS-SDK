@@ -4,8 +4,8 @@ import shutil
 import subprocess
 from pathlib import Path
 from typing import List
-import toml
 
+import toml
 from aws_lambda_powertools import Logger
 
 logger = Logger()
@@ -35,8 +35,8 @@ def main():
 
 def run_local_clean_up():
     """run a local clean up and remove older items in the dist directory"""
-    root = Path(__file__).parent.parent
-    dist_dir = os.path.join(root, "dist")
+    project_root = Path(__file__).parents[2]
+    dist_dir = os.path.join(project_root, "dist")
     if os.path.exists(dist_dir):
         # clear it out
         shutil.rmtree(dist_dir)

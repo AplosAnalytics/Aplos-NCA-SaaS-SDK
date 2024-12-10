@@ -4,7 +4,7 @@ All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
 Property of Aplos Analytics, Utah, USA
 """
 
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 
 class TestLogin:
@@ -75,3 +75,13 @@ class TestLogins:
         login.password = password
         login.domain = domain
         self.__logins.append(login)
+
+    def load(self, test_config: Dict[str, Any]):
+        """Load the logins from a list of dictionaries"""
+        logins: List[Dict[str, str]] = test_config.get("logins", [])
+        for login in logins:
+            self.add(
+                username=login["username"],
+                password=login["password"],
+                domain=login["domain"],
+            )

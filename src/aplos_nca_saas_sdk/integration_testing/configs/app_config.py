@@ -4,7 +4,7 @@ All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
 Property of Aplos Analytics, Utah, USA
 """
 
-from typing import List
+from typing import List, Dict, Any
 
 
 class TestApplicationConfiguration:
@@ -23,3 +23,7 @@ class TestApplicationConfiguration:
     @domains.setter
     def domains(self, value: List[str]):
         self.__domains = value
+
+    def load(self, test_config: Dict[str, Any]):
+        domains: List[str] = test_config.get("domains", [])
+        self.__domains = domains
