@@ -25,19 +25,7 @@
             "console": "integratedTerminal"
         },
 
-        {
-            "name": "Build & Deploy To Code Artifacts",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/devops/code_artifacts/main.py",
-            "console": "integratedTerminal",
-            "env": {
-                
-                "ENVRIONMENT": "dev",
-                "DEBUG_MODE": "True",
-                "PYTHONPATH": "${workspaceFolder}:${workspaceFolder}/src:${workspaceFolder}/devops:"
-            }
-        },
+       
         {
             "name": "Run Integration Tests - dev",
             "type": "debugpy",
