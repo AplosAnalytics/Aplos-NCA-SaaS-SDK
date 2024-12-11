@@ -10,7 +10,9 @@ from aplos_nca_saas_sdk.utilities.environment_services import EnvironmentService
 from aplos_nca_saas_sdk.integration_testing.integration_test_suite import (
     IntegrationTestSuite,
 )
-from aplos_nca_saas_sdk.integration_testing.configs.config import TestConfiguration
+from aplos_nca_saas_sdk.integration_testing.integration_test_configurations import (
+    TestConfiguration,
+)
 
 
 def main():

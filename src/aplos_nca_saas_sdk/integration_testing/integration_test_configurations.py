@@ -6,10 +6,10 @@ Property of Aplos Analytics, Utah, USA
 
 import json
 from typing import Any, Dict
-from aplos_nca_saas_sdk.integration_testing.configs.app_config import (
-    TestApplicationConfiguration,
+from aplos_nca_saas_sdk.integration_testing.configs.app_settings import (
+    ApplicationSettings,
 )
-from aplos_nca_saas_sdk.integration_testing.configs.login import TestLogins
+from aplos_nca_saas_sdk.integration_testing.configs.login import Logins
 
 
 class TestConfiguration:
@@ -19,8 +19,8 @@ class TestConfiguration:
     """
 
     def __init__(self):
-        self.app_config: TestApplicationConfiguration = TestApplicationConfiguration()
-        self.logins: TestLogins = TestLogins()
+        self.app_config: ApplicationSettings = ApplicationSettings()
+        self.logins: Logins = Logins()
 
     def load(self, file_path: str):
         """

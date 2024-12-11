@@ -6,7 +6,9 @@ Property of Aplos Analytics, Utah, USA
 
 from typing import Dict, Any, List
 
-from aplos_nca_saas_sdk.integration_testing.configs.config import TestConfiguration
+from aplos_nca_saas_sdk.integration_testing.integration_test_configurations import (
+    TestConfiguration,
+)
 from aplos_nca_saas_sdk.integration_testing.integration_test_response import (
     IntegrationTestResponse,
 )

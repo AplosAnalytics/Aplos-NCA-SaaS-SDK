@@ -2,19 +2,31 @@
     "application_config_test": {
         "purpose": "Tests the application configuration endpoints",
         "domains": [
-            "XXXXXXXXXXXXXXXXXXXXX"
+            {
+                "domain": "api.example.com",
+                "expected_results" : {
+                    "status_code": 200
+                },
+                "enabled": true
+            },
+            {
+                "domain": "XXXXXXXXXXXXXXXXXXXXX",
+                "expected_results" : {
+                    "status_code": 403
+                },
+                "enabled": false
+            }
         ]
     },
     "login_test": {
         "purpose": "Tests the login endpoints",
         "logins": [
             {
-                "username": "XXXXXXXXXXXXXXXXXXXXX",
-                "password": "XXXXXXXXXXXXXXXXXXXXX",
-                "domain": "XXXXXXXXXXXXXXXXXXXXX",
-                "roles": [
-                    "XXXXXXXXXXXXXXXXXXXXX"
-                ]
+                "username": "foo",
+                "password": "barr",
+                "domain": "api.example.com",
+                "roles": []
+                
             },
             {
                 "username": "XXXXXXXXXXXXXXXXXXXXX",
@@ -22,7 +34,11 @@
                 "domain": "XXXXXXXXXXXXXXXXXXXXX",
                 "roles": [
                     "XXXXXXXXXXXXXXXXXXXXX"
-                ]
+                ],
+                "enabled" : false,
+                "expected_results" : {
+                    "exception": "InvalidCredentialsException"
+                }
             }
         ]    
     },
@@ -31,9 +47,9 @@
         "notes": "a file can be on the local drive or pulled from a public https source.",
         "login": {
             "purpose": "optional: if present this login is used, unless a specific login is defined for the test",
-            "username": "XXXXXXXXXXXXXXXXXXXXX",
-            "password": "XXXXXXXXXXXXXXXXXXXXX",
-            "domain": "XXXXXXXXXXXXXXXXXXXXX"          
+            "username": "foo",
+            "password": "bar",
+            "domain": "api.example.com"          
         },
         "files": [
             {

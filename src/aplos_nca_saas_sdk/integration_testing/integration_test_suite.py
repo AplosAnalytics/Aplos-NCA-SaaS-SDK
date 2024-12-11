@@ -6,13 +6,18 @@ Property of Aplos Analytics, Utah, USA
 
 from typing import List, Dict, Any
 from datetime import datetime, UTC
+from aws_lambda_powertools import Logger
 from aplos_nca_saas_sdk.integration_testing.integration_test_factory import (
     IntegrationTestFactory,
 )
 from aplos_nca_saas_sdk.integration_testing.integration_test_base import (
     IntegrationTestBase,
 )
-from aplos_nca_saas_sdk.integration_testing.configs.config import TestConfiguration
+from aplos_nca_saas_sdk.integration_testing.integration_test_configurations import (
+    TestConfiguration,
+)
+
+logger = Logger(service="IntegrationTestSuite")
 
 
 class IntegrationTestSuite:
@@ -22,6 +27,7 @@ class IntegrationTestSuite:
         self.test_results: List[Dict[str, Any]] = []
         self.verbose: bool = False
         self.raise_on_failure: bool = False
+        self.fail_fast: bool = False
 
     def test(self, test_config: TestConfiguration) -> bool:
         """Run a full suite of integration tests"""
@@ -41,8 +47,8 @@ class IntegrationTestSuite:
                 "start_time_utc": datetime.now(UTC),
                 "end_time_utc": None,
             }
-            if self.verbose:
-                print(f"Running test class {test.name}")
+
+            logger.info(f"Running test class {test.name}")
             try:
                 success = test.test()
                 test_result["success"] = success
@@ -50,15 +56,18 @@ class IntegrationTestSuite:
             except Exception as e:  # pylint: disable=broad-except
                 test_result["success"] = False
                 test_result["error"] = str(e)
+                if self.fail_fast:
+                    # just break and let the failure routine handle it
+                    break
 
             test_result["end_time_utc"] = datetime.now(UTC)
             self.test_results.append(test_result)
 
-            if self.verbose:
-                if test_result["success"]:
-                    print(f"Test {test.name} succeeded")
-                else:
-                    print(f"Test {test.name} failed with error {test_result['error']}")
+            if test_result["success"]:
+                logger.info(f"Test {test.name} succeeded")
+                logger.debug(test_result)
+            else:
+                logger.error(test_result)
         # find the failures
         failures = [test for test in self.test_results if not test["success"]]
         self.__print_results(start_time, failures)
@@ -67,7 +76,7 @@ class IntegrationTestSuite:
 
         if self.raise_on_failure and len(failures) > 0:
             count = len(failures)
-            print(f"{count} tests failed. Raising exception.")
+            logger.error(f"{count} tests failed. Raising exception.")
             raise RuntimeError(f"{count} tests failed")
 
         return len(failures) == 0
