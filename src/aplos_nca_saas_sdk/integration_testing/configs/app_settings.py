@@ -14,9 +14,9 @@ class ApplicationDomain(ConfigBase):
 
     """
 
-    def __init__(self):
+    def __init__(self, domain: str | None = None):
         super().__init__()
-        self.__domain: str | None = None
+        self.__domain: str | None = domain
 
     @property
     def domain(self) -> str:
@@ -30,25 +30,32 @@ class ApplicationDomain(ConfigBase):
         self.__domain = value
 
 
-class ApplicationSettings:
+class ApplicationDomains(ConfigBase):
     """
-    Application Settings: Defines the domains that the application settings (configuration endpoint) tests will check against
+    Application ApplicationDomain: Defines the Domains that the application configuration tests will check against
 
     """
 
     def __init__(self):
+        super().__init__()
         self.__domains: List[ApplicationDomain] = []
 
     @property
-    def domains(self) -> List[ApplicationDomain]:
+    def list(self) -> List[ApplicationDomain]:
+        """List the logins"""
         return self.__domains
 
-    @domains.setter
-    def domains(self, value: List[ApplicationDomain]):
-        self.__domains = value
+    def add(self, *, domain: str, enabled: bool = True):
+        """Add a loging"""
+        app_domain = ApplicationDomain()
+        app_domain.domain = domain
+        app_domain.enabled = enabled
+        self.__domains.append(app_domain)
 
     def load(self, test_config: Dict[str, Any]):
-        """Load the domains from the config"""
+        """Load the logins from a list of dictionaries"""
+        # self.enabled = bool(test_config.get("enabled", True))
+        super().load(test_config)
         domains: List[Dict[str, Any]] = test_config.get("domains", [])
 
         domain: Dict[str, Any]
@@ -58,3 +65,24 @@ class ApplicationSettings:
             app_domain.enabled = bool(domain.get("enabled", True))
 
             self.__domains.append(app_domain)
+
+
+class ApplicationSettings(ConfigBase):
+    """
+    Application Settings: Defines the domains that the application settings (configuration endpoint) tests will check against
+
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.__domains: ApplicationDomains = ApplicationDomains()
+
+    @property
+    def domains(self) -> ApplicationDomains:
+        """List of the domain"""
+        return self.__domains
+
+    def load(self, test_config: Dict[str, Any]):
+        """Load the domains from the config"""
+        super().load(test_config)
+        self.domains.load(test_config)

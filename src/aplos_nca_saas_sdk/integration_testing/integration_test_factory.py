@@ -49,14 +49,14 @@ class IntegrationTestFactory:
                     and obj is not IntegrationTestBase
                 ):
                     # Instantiate the class and store it
-                    self.register_test_class(obj())
+                    self.register_test_instance(obj())
 
     @property
-    def test_classes(self) -> List[IntegrationTestBase]:
+    def test_instances(self) -> List[IntegrationTestBase]:
         """Get the test classes"""
         self.__test_classes.sort(key=lambda x: x.index)
         return self.__test_classes
 
-    def register_test_class(self, test_class: IntegrationTestBase):
+    def register_test_instance(self, test_class: IntegrationTestBase):
         """Register a test class"""
         self.__test_classes.append(test_class)

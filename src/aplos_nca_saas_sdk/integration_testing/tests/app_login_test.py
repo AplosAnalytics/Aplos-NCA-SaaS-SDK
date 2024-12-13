@@ -29,6 +29,10 @@ class TestAppLogin(IntegrationTestBase):
         for login in self.config.logins.list:
             test_response: IntegrationTestResponse = IntegrationTestResponse()
             test_response.name = self.name
+            if not login.enabled or not self.config.logins.enabled:
+                test_response.skipped = True
+                self.results.append(test_response)
+                continue
             try:
                 nca_login = NCALogin(aplos_saas_domain=login.domain)
                 token = nca_login.authenticate(

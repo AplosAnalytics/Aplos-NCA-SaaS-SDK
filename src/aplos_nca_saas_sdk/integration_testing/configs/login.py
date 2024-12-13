@@ -95,7 +95,8 @@ class Logins(ConfigBase):
 
     def load(self, test_config: Dict[str, Any]):
         """Load the logins from a list of dictionaries"""
-        self.enabled = bool(test_config.get("enabled", True))
+        # self.enabled = bool(test_config.get("enabled", True))
+        super().load(test_config)
         logins: List[Dict[str, str]] = test_config.get("logins", [])
         for login in logins:
             self.add(

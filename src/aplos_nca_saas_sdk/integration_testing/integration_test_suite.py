@@ -38,21 +38,24 @@ class IntegrationTestSuite:
         start_time: datetime = datetime.now(UTC)
         factory: IntegrationTestFactory = IntegrationTestFactory()
         test: IntegrationTestBase | None = None
-        for test in factory.test_classes:
+        for test in factory.test_instances:
             test.config = test_config
             test_result: Dict[str, Any] = {
                 "test_name": test.name,
                 "success": True,
                 "error": None,
-                "start_time_utc": datetime.now(UTC),
+                "skipped": False,
+                "start_time_utc": None,
                 "end_time_utc": None,
             }
 
             logger.info(f"Running test class {test.name}")
             try:
+                test_result["start_time_utc"] = datetime.now(UTC)
                 success = test.test()
                 test_result["success"] = success
                 test_result["results"] = test.results
+
             except Exception as e:  # pylint: disable=broad-except
                 test_result["success"] = False
                 test_result["error"] = str(e)
@@ -96,3 +99,6 @@ class IntegrationTestSuite:
         print(f"Total Tests: {len(self.test_results)}")
         print(f"Successful Tests: {len(self.test_results) - len(failures)}")
         print(f"Failed Tests: {len(failures)}")
+        print(
+            f"Skipped Tests: {len([test for test in self.test_results if test['skipped']])}"
+        )

@@ -22,7 +22,7 @@ class IntegrationTestBase:
     def __init__(self, name: str | None = None, index: int = 0):
         self.name = name
         self.index = index
-        self.__config: TestConfiguration | None = None
+        self.__config: TestConfiguration = TestConfiguration()
         self.__results: List[IntegrationTestResponse] = []
 
     @property
