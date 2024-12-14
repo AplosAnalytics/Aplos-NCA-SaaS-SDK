@@ -55,7 +55,25 @@ class IntegrationTestBase:
         """
         Returns True if all tests in the suite were successful
         """
-        return all([result.success for result in self.results])
+        return all([result.error is None for result in self.results])
+
+    def skipped_count(self) -> int:
+        """
+        Gets the number of tests that were skipped
+        """
+        return len([result for result in self.results if result.skipped])
+
+    def error_count(self) -> int:
+        """
+        Gets the number of tests that resulted in an error
+        """
+        return len([result for result in self.results if result.error is not None])
+
+    def errors(self) -> List[str]:
+        """
+        Gets the list of errors that occurred during the test
+        """
+        return [result.error for result in self.results if result.error is not None]
 
     def test(self) -> bool:
         """

@@ -29,12 +29,16 @@ def main():
 
     # normally we'd pull a test configuration file from Secrets Manager, Parameter Store, or some other secure location
     # here we're going to pull the sample file and then override some it's values.
-    config_file = os.path.join(Path(__file__).parent, "configs", "config_sample.json")
+    config_file = os.path.join(
+        Path(__file__).parent,
+        "configs",
+        os.getenv("TEST_CONFIG_FILE") or "config_sample.json",
+    )
     # load it so we can see what it looks like
     config.load(file_path=config_file)
 
     # override the configuration
-    override_config(config)
+    # override_config(config)
 
     its.test(test_config=config)
 

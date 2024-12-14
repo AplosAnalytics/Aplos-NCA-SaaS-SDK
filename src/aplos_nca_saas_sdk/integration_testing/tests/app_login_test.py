@@ -31,6 +31,7 @@ class TestAppLogin(IntegrationTestBase):
             test_response.name = self.name
             if not login.enabled or not self.config.logins.enabled:
                 test_response.skipped = True
+                test_response.success = True
                 self.results.append(test_response)
                 continue
             try:
