@@ -16,6 +16,7 @@ class IntegrationTestResponse:
         self.response: Dict[str, Any] = {}
         self.error: Optional[str] = None
         self.success: bool = False
+        self.skipped: bool = False
 
     def to_dict(self) -> Dict[str, Any]:
         """JSON Dictionary Object"""
@@ -25,4 +26,5 @@ class IntegrationTestResponse:
             "response": self.response,
             "error": self.error,
             "success": self.success,
+            "skipped": self.skipped,
         }

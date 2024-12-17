@@ -7,7 +7,9 @@ Property of Aplos Analytics, Utah, USA
 from typing import Dict, Any, List
 from abc import ABC, abstractmethod
 
-from aplos_nca_saas_sdk.integration_testing.configs.config import TestConfiguration
+from aplos_nca_saas_sdk.integration_testing.integration_test_configurations import (
+    TestConfiguration,
+)
 from aplos_nca_saas_sdk.integration_testing.integration_test_response import (
     IntegrationTestResponse,
 )
@@ -21,7 +23,7 @@ class IntegrationTestBase(ABC):
     def __init__(self, name: str | None = None, index: int = 0):
         self.name = name
         self.index = index
-        self.__config: TestConfiguration | None = None
+        self.__config: TestConfiguration = TestConfiguration()
         self.__results: List[IntegrationTestResponse] = []
 
     @property
@@ -54,7 +56,25 @@ class IntegrationTestBase(ABC):
         """
         Returns True if all tests in the suite were successful
         """
-        return all([result.success for result in self.results])
+        return all([result.error is None for result in self.results])
+
+    def skipped_count(self) -> int:
+        """
+        Gets the number of tests that were skipped
+        """
+        return len([result for result in self.results if result.skipped])
+
+    def error_count(self) -> int:
+        """
+        Gets the number of tests that resulted in an error
+        """
+        return len([result for result in self.results if result.error is not None])
+
+    def errors(self) -> List[str]:
+        """
+        Gets the list of errors that occurred during the test
+        """
+        return [result.error for result in self.results if result.error is not None]
 
     @abstractmethod
     def test(self) -> bool:

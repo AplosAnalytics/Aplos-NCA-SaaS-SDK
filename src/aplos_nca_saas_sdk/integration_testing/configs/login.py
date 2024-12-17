@@ -4,10 +4,11 @@ All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
 Property of Aplos Analytics, Utah, USA
 """
 
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
+from aplos_nca_saas_sdk.integration_testing.configs._config_base import ConfigBase
 
 
-class TestLogin:
+class Login(ConfigBase):
     """
     Application Login: Defines the login that the application configuration tests will check against
 
@@ -18,10 +19,13 @@ class TestLogin:
         username: Optional[str] = None,
         passord: Optional[str] = None,
         domain: Optional[str] = None,
+        roles: Optional[List[str]] = None,
     ):
+        super().__init__()
         self.__username: Optional[str] = username
         self.__password: Optional[str] = passord
         self.__domain: Optional[str] = domain
+        self.__roles: List[str] = roles if roles is not None else []
 
     @property
     def username(self) -> str:
@@ -53,25 +57,50 @@ class TestLogin:
     def domain(self, value: str):
         self.__domain = value
 
+    @property
+    def roles(self) -> List[str]:
+        """A list of roles to check for"""
+        return self.__roles
 
-class TestLogins:
+    @roles.setter
+    def roles(self, value: List[str] | None):
+        if value is None:
+            value = []
+        self.__roles = value
+
+
+class Logins(ConfigBase):
     """
     Application Logins: Defines the logins that the application configuration tests will check against
 
     """
 
     def __init__(self):
-        self.__logins: List[TestLogin] = []
+        super().__init__()
+        self.__logins: List[Login] = []
 
     @property
-    def list(self) -> List[TestLogin]:
+    def list(self) -> List[Login]:
         """List the logins"""
         return self.__logins
 
-    def add(self, *, username: str, password: str, domain: str):
+    def add(self, *, username: str, password: str, domain: str, enabled: bool = True):
         """Add a loging"""
-        login = TestLogin()
+        login = Login()
         login.username = username
         login.password = password
         login.domain = domain
+        login.enabled = enabled
         self.__logins.append(login)
+
+    def load(self, test_config: Dict[str, Any]):
+        """Load the logins from a list of dictionaries"""
+        # self.enabled = bool(test_config.get("enabled", True))
+        super().load(test_config)
+        logins: List[Dict[str, str]] = test_config.get("logins", [])
+        for login in logins:
+            self.add(
+                username=login["username"],
+                password=login["password"],
+                domain=login["domain"],
+            )

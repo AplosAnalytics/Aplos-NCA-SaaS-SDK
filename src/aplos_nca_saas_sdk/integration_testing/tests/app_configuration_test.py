@@ -26,11 +26,17 @@ class TestAppConfiguration(IntegrationTestBase):
         """Test loading the application configuration"""
 
         self.results.clear()
-        for domain in self.config.app_config.domains:
-            config: NCAAppConfiguration = NCAAppConfiguration(domain)
+        for domain_config in self.config.app_config.domains.list:
+            config: NCAAppConfiguration = NCAAppConfiguration(domain_config.domain)
 
             test_response: IntegrationTestResponse = IntegrationTestResponse()
-            test_response.meta = {"domain": domain}
+            test_response.meta = {"domain": domain_config}
+
+            if not domain_config.enabled or not self.config.app_config.enabled:
+                test_response.skipped = True
+                self.results.append(test_response)
+                continue
+
             try:
                 response = config.get()
                 test_response.response = response
