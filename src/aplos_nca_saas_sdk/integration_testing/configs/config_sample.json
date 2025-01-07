@@ -53,10 +53,7 @@
         },
         "files": [
             {
-                "file": "XXXXXXXXXXXXXXXXXXXXX",                
-                "expected_results" : {
-                    "status_code": 200
-                }
+                "file": "XXXXXXXXXXXXXXXXXXXXX"
             },
             {
                 "file": "XXXXXXXXXXXXXXXXXXXXX",
@@ -65,9 +62,6 @@
                     "username": "XXXXXXXXXXXXXXXXXXXXX",
                     "password": "XXXXXXXXXXXXXXXXXXXXX",
                     "domain": "XXXXXXXXXXXXXXXXXXXXX" 
-                },
-                "expected_results" : {
-                    "status_code": 403
                 }
             }
         ]

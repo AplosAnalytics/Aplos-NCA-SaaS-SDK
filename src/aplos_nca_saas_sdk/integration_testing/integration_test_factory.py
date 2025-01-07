@@ -13,7 +13,7 @@ import inspect
 from aplos_nca_saas_sdk.integration_testing.integration_test_base import (
     IntegrationTestBase,
 )
-from aplos_nca_saas_sdk.integration_testing.tests.file_upload_tests.file_upload_test_base import FileUploadTestBase
+from aplos_nca_saas_sdk.integration_testing.tests.file_upload_test import FileUploadTest
 
 
 class IntegrationTestFactory:
@@ -49,7 +49,6 @@ class IntegrationTestFactory:
                 if (
                     issubclass(obj, IntegrationTestBase)
                     and obj is not IntegrationTestBase
-                    and obj is not FileUploadTestBase
                 ):
                     # Instantiate the class and store it
                     self.register_test_instance(obj())

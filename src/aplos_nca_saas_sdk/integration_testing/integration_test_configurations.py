@@ -9,6 +9,7 @@ from typing import Any, Dict
 from aplos_nca_saas_sdk.integration_testing.configs.app_settings import (
     ApplicationSettings,
 )
+from aplos_nca_saas_sdk.integration_testing.configs.file_upload import FileUploads
 from aplos_nca_saas_sdk.integration_testing.configs.login import Logins
 
 
@@ -21,7 +22,7 @@ class TestConfiguration:
     def __init__(self):
         self.app_config: ApplicationSettings = ApplicationSettings()
         self.logins: Logins = Logins()
-
+        self.file_uploads: FileUploads = FileUploads()
     def load(self, file_path: str):
         """
         Loads the configuration from a file
@@ -36,3 +37,4 @@ class TestConfiguration:
 
         self.logins.load(config.get("login_test", {}))
         self.app_config.load(config.get("application_config_test", {}))
+        self.file_uploads.load(config.get("file_upload_test", {}))

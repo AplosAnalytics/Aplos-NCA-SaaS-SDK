@@ -11,7 +11,6 @@ class NCAFileUpload:
 
     def __init__(self, nca_login: NCALogin) -> None:
 
-        # TODO:// Confirm we can determine logged in state via existence of jwt
         if nca_login is None or nca_login.jwt is None or not nca_login.jwt:
             raise ValueError("Authenticated nca_login is required.")
 
@@ -41,7 +40,6 @@ class NCAFileUpload:
         if input_file_path is None or not input_file_path:
             raise ValueError("Valid input_file_path is required.")
         
-        # TODO: Should we confirm file upload size as we do in UI? Should there be a separate test for this?
         uploader: S3PresignedUpload = S3PresignedUpload(self.__jwt, str(self.api_root))
         presign_payload: S3PresignedPayload = uploader.upload_file(input_file_path)
 
