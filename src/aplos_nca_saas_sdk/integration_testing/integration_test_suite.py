@@ -102,7 +102,7 @@ class IntegrationTestSuite:
                 f"  {test_result['test_name']} {'succeeded' if test_result['success'] else 'failed'} duration: {duration}"
             )
             if not test_result["success"]:
-                print(f"    Error: {test_result['errors']}")
+                print(f"    Errors: {test_result['errors']}")
 
         print(f"Test Suite completed in {datetime.now(UTC) - start_time}")
 

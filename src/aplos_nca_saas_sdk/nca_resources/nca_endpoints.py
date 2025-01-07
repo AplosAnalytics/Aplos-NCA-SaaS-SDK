@@ -52,3 +52,7 @@ class NCAEndpoints:
     def file(self, tenant_id: str, user_id: str, file_id: str) -> str:
         """Returns the file endpoint"""
         return f"{self.files(tenant_id=tenant_id, user_id=user_id)}/{file_id}"
+    
+    def file_data(self, tenant_id: str, user_id: str, file_id: str) -> str:
+        """Returns get file data endpoint"""
+        return f"{self.__base(tenant_id=tenant_id, user_id=user_id)}/nca/files/{file_id}/data"

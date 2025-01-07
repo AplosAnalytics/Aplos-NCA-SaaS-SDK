@@ -44,7 +44,7 @@ class S3PresignedUpload:
     def __get_presigned_upload_info(self, input_file: str) -> S3PresignedPayload:
         """
         Performs all the necessary steps for creating a presigned url to upload a file to S3.
-        We're using AWS S3 presigned urls for security as well as allowing for very large files if requried.
+        We're using AWS S3 presigned urls for security as well as allowing for very large files if required.
         Args:
             input_file (str): the path to the input (analysis) file
 
