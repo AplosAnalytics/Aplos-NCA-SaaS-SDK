@@ -22,7 +22,7 @@ class NCAFileUpload:
     @property
     def api_root(self) -> str:
         """Gets the base url"""
-        # TODO:// Consider refactoring this into service method
+        
         if self.__api_domain is None:
             raise RuntimeError("Missing Aplos Api Domain")
 
