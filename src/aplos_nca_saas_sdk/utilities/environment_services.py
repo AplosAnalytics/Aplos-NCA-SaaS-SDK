@@ -59,7 +59,7 @@ class EnvironmentServices:
     def find_file(
         self, starting_path: str, file_name: str, raise_error_if_not_found: bool = True
     ) -> str | None:
-        """Searches the project directory structor for a file"""
+        """Searches the project directory structure for a file"""
         parents = 10
         starting_path = starting_path or __file__
 
@@ -76,6 +76,33 @@ class EnvironmentServices:
             searched_paths = "\n".join(paths)
             raise RuntimeError(
                 f"Failed to locate environment file: {file_name} in: \n {searched_paths}"
+            )
+
+        return None
+
+    def find_module_path(
+        self,
+        starting_path: str | None = None,
+        raise_error_if_not_found: bool = True,
+    ) -> str | None:
+        """From a given starting point, move up the directory chain until you find the modules root"""
+        parents = 10
+        starting_path = starting_path or __file__
+        MODULE_ROOT = "aplos_nca_saas_sdk"  # pylint: disable=c0103
+        paths: List[str] = []
+        for parent in range(parents):
+            path = Path(starting_path).parents[parent].absolute()
+
+            # get the directory name
+            directory_name = os.path.basename(path)
+            if directory_name == MODULE_ROOT:
+                # return the full path
+                return str(path)
+
+        if raise_error_if_not_found:
+            searched_paths = "\n".join(paths)
+            raise RuntimeError(
+                f"Failed to locate the moduel root: {MODULE_ROOT} in: \n {searched_paths}"
             )
 
         return None
