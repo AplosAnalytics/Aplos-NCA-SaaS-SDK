@@ -113,6 +113,7 @@ class S3PresignedUpload:
             return {
                 "status_code": upload_response.status_code,
                 "reason": upload_response.reason,
+                "details": "File uploaded successfully. Post-Processing will being soon.",
                 "file_id": payload.file_id,
             }
         else:
