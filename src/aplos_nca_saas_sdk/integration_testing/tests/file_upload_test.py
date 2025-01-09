@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict
 
 import requests
-
+from aws_lambda_powertools import Logger
 from aplos_nca_saas_sdk.integration_testing.configs.login import Login
 from aplos_nca_saas_sdk.integration_testing.integration_test_base import (
     IntegrationTestBase,
@@ -20,6 +20,8 @@ from aplos_nca_saas_sdk.integration_testing.integration_test_response import (
 from aplos_nca_saas_sdk.nca_resources.nca_file_upload import NCAFileUpload
 from aplos_nca_saas_sdk.nca_resources.nca_login import NCALogin
 from aplos_nca_saas_sdk.utilities.http_utility import HttpUtilities
+
+logger = Logger(child=True)
 
 
 class FileUploadTest(IntegrationTestBase):
@@ -69,6 +71,8 @@ class FileUploadTest(IntegrationTestBase):
         return nca_login
 
     def __upload(self, nca_login: NCALogin, upload_file_path: str) -> Dict[str, Any]:
+        logger.info({"message": "Uploading file", "file_path": upload_file_path})
+
         nca_file_upload = NCAFileUpload(nca_login)
         upload_response: Dict[str, Any] = nca_file_upload.upload(upload_file_path)
         return upload_response
@@ -79,6 +83,7 @@ class FileUploadTest(IntegrationTestBase):
         file_id: str,
         test_response: IntegrationTestResponse,
     ):
+        logger.info({"message": "Downloading file", "file_id": file_id})
         file_data_endpoint = nca_login.config.endpoints.file_data(
             nca_login.cognito.tenant_id,
             nca_login.cognito.user_id,
