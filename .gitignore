@@ -11,3 +11,4 @@ dist/
 # don't track environment files
 .env
 .env.*
+.config.*
