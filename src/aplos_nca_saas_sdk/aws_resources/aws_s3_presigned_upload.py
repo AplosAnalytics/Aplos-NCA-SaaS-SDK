@@ -6,6 +6,7 @@ Property of Aplos Analytics, Utah, USA
 
 import json
 import os
+from typing import Any, Dict
 
 import requests
 from aplos_nca_saas_sdk.aws_resources.aws_s3_presigned_payload import (
@@ -21,7 +22,7 @@ class S3PresignedUpload:
         self.api_url = api_url
         self.jwt = jwt
 
-    def upload_file(self, input_file: str) -> S3PresignedPayload:
+    def upload_file(self, input_file: str) -> Dict[str, Any]:
         """
         Uploads a file to your Aplos Cloud Account in AWS
 
@@ -29,7 +30,7 @@ class S3PresignedUpload:
             input_file (str): path to the analysis file you are uploading
 
         Returns:
-            S3PresignedPayload: an instance of S3PresignedPayload
+            Dictionary: including the file_id, status code and response information
         """
 
         # get the presigned url for uploading
@@ -37,9 +38,9 @@ class S3PresignedUpload:
             input_file=input_file
         )
         # upload the files
-        self.__upload_file_to_s3(paylod, input_file=input_file)
+        upload_response = self.__upload_file_to_s3(paylod, input_file=input_file)
 
-        return paylod
+        return upload_response
 
     def __get_presigned_upload_info(self, input_file: str) -> S3PresignedPayload:
         """
@@ -79,7 +80,9 @@ class S3PresignedUpload:
 
         return payload
 
-    def __upload_file_to_s3(self, payload: S3PresignedPayload, input_file: str) -> bool:
+    def __upload_file_to_s3(
+        self, payload: S3PresignedPayload, input_file: str
+    ) -> Dict[str, Any]:
         """
         Peforms the actual uploading via a presigned url for S3 bucket storage
         Args:
@@ -107,7 +110,11 @@ class S3PresignedUpload:
 
         # Check the response: 204 is a success in this case
         if upload_response and upload_response.status_code == 204:
-            return True
+            return {
+                "status_code": upload_response.status_code,
+                "reason": upload_response.reason,
+                "file_id": payload.file_id,
+            }
         else:
             raise RuntimeError(
                 "Error uploading the file. "

@@ -10,12 +10,11 @@ import time
 import zipfile
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any, Dict
 
 import requests
+
 from aplos_nca_saas_sdk.aws_resources.aws_cognito import CognitoAuthenication
-from aplos_nca_saas_sdk.aws_resources.aws_s3_presigned_payload import (
-    S3PresignedPayload,
-)
 from aplos_nca_saas_sdk.aws_resources.aws_s3_presigned_upload import (
     S3PresignedUpload,
 )
@@ -90,12 +89,12 @@ class NCAEngine:
         if self.verbose:
             print("\tUploading the analysis file.")
         uploader: S3PresignedUpload = S3PresignedUpload(self.jwt, str(self.api_root))
-        presign_payload: S3PresignedPayload = uploader.upload_file(input_file_path)
+        upload_response: Dict[str, Any] = uploader.upload_file(input_file_path)
 
         if self.verbose:
             print("\tStarting the execution.")
         execution_id = self.run_analysis(
-            file_id=str(presign_payload.file_id),
+            file_id=upload_response.get("file_id", ""),
             config_data=config_data,
             meta_data=meta_data,
         )
@@ -131,6 +130,13 @@ class NCAEngine:
             str: the execution id
         """
 
+        if not file_id:
+            raise ValueError("Missing file_id.  Please provide a valid file_id.")
+
+        if not config_data:
+            raise ValueError(
+                "Missing config_data.  Please provide a valid config_data."
+            )
         headers = HttpUtilities.get_headers(self.jwt)
         # to start a new execution we need the location of the file (s3 bucket and object key)
         # you basic configuration
