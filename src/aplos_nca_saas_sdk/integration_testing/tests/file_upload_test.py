@@ -21,7 +21,7 @@ from aplos_nca_saas_sdk.nca_resources.nca_file_upload import NCAFileUpload
 from aplos_nca_saas_sdk.nca_resources.nca_login import NCALogin
 from aplos_nca_saas_sdk.utilities.http_utility import HttpUtilities
 
-logger = Logger(child=True)
+logger = Logger()
 
 
 class FileUploadTest(IntegrationTestBase):
