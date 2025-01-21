@@ -4,14 +4,14 @@
         "domains": [
             {
                 "domain": "api.example.com",
-                "expected_results" : {
+                "expected_results": {
                     "status_code": 200
                 },
                 "enabled": true
             },
             {
                 "domain": "XXXXXXXXXXXXXXXXXXXXX",
-                "expected_results" : {
+                "expected_results": {
                     "status_code": 403
                 },
                 "enabled": false
@@ -26,7 +26,6 @@
                 "password": "barr",
                 "domain": "api.example.com",
                 "roles": []
-                
             },
             {
                 "username": "XXXXXXXXXXXXXXXXXXXXX",
@@ -35,12 +34,12 @@
                 "roles": [
                     "XXXXXXXXXXXXXXXXXXXXX"
                 ],
-                "enabled" : false,
-                "expected_results" : {
+                "enabled": false,
+                "expected_results": {
                     "exception": "InvalidCredentialsException"
                 }
             }
-        ]    
+        ]
     },
     "file_upload_test": {
         "purpose": "Tests the file upload endpoints.",
@@ -49,7 +48,7 @@
             "purpose": "optional: if present this login is used, unless a specific login is defined for the test",
             "username": "foo",
             "password": "bar",
-            "domain": "api.example.com"          
+            "domain": "api.example.com"
         },
         "files": [
             {
@@ -57,11 +56,11 @@
             },
             {
                 "file": "XXXXXXXXXXXXXXXXXXXXX",
-                "login" : {
+                "login": {
                     "purpose": "optional: if present tests an upload for a specific user",
                     "username": "XXXXXXXXXXXXXXXXXXXXX",
                     "password": "XXXXXXXXXXXXXXXXXXXXX",
-                    "domain": "XXXXXXXXXXXXXXXXXXXXX" 
+                    "domain": "XXXXXXXXXXXXXXXXXXXXX"
                 }
             }
         ]
@@ -71,14 +70,29 @@
         "login": {
             "username": "XXXXXXXXXXXXXXXXXXXXX",
             "password": "XXXXXXXXXXXXXXXXXXXXX",
-            "domain": "XXXXXXXXXXXXXXXXXXXXX"          
+            "domain": "XXXXXXXXXXXXXXXXXXXXX"
         },
+        "output_dir": "XXXXXXXXXXXXXXXXXXXXX",
         "analyses": [
-            {                
+            {
                 "file": "XXXXXXXXXXXXXXXXXXXXX",
                 "meta": {},
                 "config": {},
-                "expected_results" : {
+                "expected_results": {
+                    "status_code": 200
+                },
+                "output_dir": "XXXXXXXXXXXXXXXXXXXXX"
+            },
+            {
+                "file": "XXXXXXXXXXXXXXXXXXXXX",
+                "meta": {},
+                "config": {},
+                "login": {
+                    "username": "XXXXXXXXXXXXXXXXXXXXX",
+                    "password": "XXXXXXXXXXXXXXXXXXXXX",
+                    "domain": "XXXXXXXXXXXXXXXXXXXXX"
+                },
+                "expected_results": {
                     "status_code": 200
                 }
             }
@@ -89,11 +103,10 @@
         "login": {
             "username": "XXXXXXXXXXXXXXXXXXXXX",
             "password": "XXXXXXXXXXXXXXXXXXXXX",
-            "domain": "XXXXXXXXXXXXXXXXXXXXX"          
+            "domain": "XXXXXXXXXXXXXXXXXXXXX"
         },
         "expected_results": {
             "status_code": 200
         }
     }
-    
 }

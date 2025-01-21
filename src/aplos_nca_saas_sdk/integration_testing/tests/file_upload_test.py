@@ -10,7 +10,7 @@ from typing import Any, Dict
 
 import requests
 from aws_lambda_powertools import Logger
-from aplos_nca_saas_sdk.integration_testing.configs.login import Login
+from aplos_nca_saas_sdk.integration_testing.configs.login_config import LoginConfig
 from aplos_nca_saas_sdk.integration_testing.integration_test_base import (
     IntegrationTestBase,
 )
@@ -65,7 +65,7 @@ class FileUploadTest(IntegrationTestBase):
 
         return self.success()
 
-    def __login(self, login: Login) -> NCALogin:
+    def __login(self, login: LoginConfig) -> NCALogin:
         nca_login = NCALogin(aplos_saas_domain=login.domain)
         nca_login.authenticate(username=login.username, password=login.password)
         return nca_login

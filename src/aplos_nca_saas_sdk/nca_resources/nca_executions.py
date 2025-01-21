@@ -14,7 +14,7 @@ from typing import Any, Dict
 
 import requests
 
-from aplos_nca_saas_sdk.aws_resources.aws_cognito import CognitoAuthenication
+from aplos_nca_saas_sdk.aws_resources.aws_cognito import CognitoAuthentication
 from aplos_nca_saas_sdk.aws_resources.aws_s3_presigned_upload import (
     S3PresignedUpload,
 )
@@ -22,7 +22,7 @@ from aplos_nca_saas_sdk.utilities.commandline_args import CommandlineArgs
 from aplos_nca_saas_sdk.utilities.http_utility import HttpUtilities, Routes
 
 
-class NCAEngine:
+class NCAExecution:
     """NCA Engine Access"""
 
     def __init__(
@@ -34,8 +34,8 @@ class NCAEngine:
         self.__api_domain: str | None = api_domain
         self.verbose: bool = False
 
-        self.cognito: CognitoAuthenication = CognitoAuthenication(
-            client_id=cognito_client_id, region=region
+        self.cognito: CognitoAuthentication = CognitoAuthentication(
+            client_id=cognito_client_id, region=region, aplos_domain=api_domain
         )
 
         if not self.__api_domain:
@@ -69,17 +69,17 @@ class NCAEngine:
         wait_for_results: bool = True,
         output_directory: str | None = None,
         unzip_after_download: bool = False,
-    ) -> None:
+    ) -> str | None:
         """_summary_
 
         Args:
             username (str): the username
             password (str): the users password
-            input_file_path (str): the path to the input (anlysis) file
-            config_data (dict): analysis configuration infomration
+            input_file_path (str): the path to the input (analysis) file
+            config_data (dict): analysis configuration information
             meta_data (str | dict | None, optional): meta data attached to the execution. Defaults to None.
             wait_for_results (bool, optional): should the program wait for results. Defaults to True.
-            output_directory (str, optional): the output directory. Defaults to None (the local directy is used)
+            output_directory (str, optional): the output directory. Defaults to None (the local directory is used)
             unzip_after_download (bool): Results are downloaded as a zip file, this option will unzip them automatically.  Defaults to False
         """
         if self.verbose:
@@ -103,14 +103,20 @@ class NCAEngine:
             # wait for it
             download_url = self.wait_for_results(execution_id=execution_id)
             # download the files
-            if download_url:
+            if download_url is None:
+                raise RuntimeError("Unexpected empty download_url when attempting to download results.")
+            else:
                 if self.verbose:
                     print("\tDownloading the results.")
-                self.download_file(
+                return self.download_file(
                     download_url,
                     output_directory=output_directory,
                     do_unzip=unzip_after_download,
                 )
+        else:
+            if self.verbose:
+                print("\Bypassed results download.")
+            return None
 
     def run_analysis(
         self,
@@ -222,11 +228,7 @@ class NCAEngine:
                 print(f"\tExecution duration = {elapsed}.")
             return json_response["presigned"]["url"]
         else:
-            if self.verbose:
-                print(
-                    f"\tExecution failed. Execution ID = {execution_id}. reason: {json_response.get('errors')}"
-                )
-            return None
+            raise RuntimeError(f"\tExecution failed. Execution ID = {execution_id}. reason: {json_response.get('errors')}")
 
     def download_file(
         self,
@@ -249,31 +251,28 @@ class NCAEngine:
             output_directory = str(Path(__file__).parent.parent)
             output_directory = os.path.join(output_directory, ".aplos-nca-output")
 
-        if presigned_download_url:
-            output_file = f"results-{time.strftime('%Y-%m-%d-%Hh%Mm%Ss')}.zip"
+        output_file = f"results-{time.strftime('%Y-%m-%d-%Hh%Mm%Ss')}.zip"
 
-            output_file = os.path.join(output_directory, output_file)
-            os.makedirs(output_directory, exist_ok=True)
+        output_file = os.path.join(output_directory, output_file)
+        os.makedirs(output_directory, exist_ok=True)
 
-            response = requests.get(presigned_download_url, timeout=60)
-            # write the zip to a file
-            with open(output_file, "wb") as f:
-                f.write(response.content)
+        response = requests.get(presigned_download_url, timeout=60)
+        # write the zip to a file
+        with open(output_file, "wb") as f:
+            f.write(response.content)
 
-            # optionally, extract all the files from the zip
-            if do_unzip:
-                with zipfile.ZipFile(output_file, "r") as zip_ref:
-                    zip_ref.extractall(output_file.replace(".zip", ""))
+        # optionally, extract all the files from the zip
+        if do_unzip:
+            with zipfile.ZipFile(output_file, "r") as zip_ref:
+                zip_ref.extractall(output_file.replace(".zip", ""))
 
-            unzipped_state = "and unzipped" if do_unzip else "in zip format"
+        unzipped_state = "and unzipped" if do_unzip else "in zip format"
 
-            if self.verbose:
-                print(f"\tResults file downloaded {unzipped_state}.")
-                print(f"\t\tResults are available in: {output_directory}")
+        if self.verbose:
+            print(f"\tResults file downloaded {unzipped_state}.")
+            print(f"\t\tResults are available in: {output_directory}")
 
-            return output_directory
-        else:
-            return None
+        return output_file
 
 
 def main():
@@ -292,7 +291,7 @@ def main():
             print("Missing some arguments.")
             exit()
 
-        engine = NCAEngine(
+        engine = NCAExecution(
             api_domain=args.api_domain,
             cognito_client_id=args.cognito_client_id,
             region=args.aws_region,

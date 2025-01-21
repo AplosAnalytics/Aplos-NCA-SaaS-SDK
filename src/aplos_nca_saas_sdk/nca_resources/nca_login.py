@@ -5,7 +5,7 @@ Property of Aplos Analytics, Utah, USA
 """
 
 from typing import Optional
-from aplos_nca_saas_sdk.aws_resources.aws_cognito import CognitoAuthenication
+from aplos_nca_saas_sdk.aws_resources.aws_cognito import CognitoAuthentication
 from aplos_nca_saas_sdk.nca_resources.nca_app_configuration import (
     NCAAppConfiguration,
 )
@@ -39,18 +39,18 @@ class NCALogin:
         self.__cognito_client_id = cognito_client_id
         self.__region = cognito_region
         self.__domain: Optional[str] = aplos_saas_domain
-        self.__cognito: Optional[CognitoAuthenication] = None
+        self.__cognito: Optional[CognitoAuthentication] = None
         self.__config: Optional[NCAAppConfiguration] = None
 
     @property
-    def cognito(self) -> CognitoAuthenication:
+    def cognito(self) -> CognitoAuthentication:
         """
         Cognito Authentication
         Returns:
             CognitoAuthenication: object to handle cognito authentication
         """
         if self.__cognito is None:
-            self.__cognito = CognitoAuthenication(
+            self.__cognito = CognitoAuthentication(
                 client_id=self.__cognito_client_id,
                 region=self.__region,
                 aplos_domain=self.__domain,

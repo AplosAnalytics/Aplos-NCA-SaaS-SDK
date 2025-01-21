@@ -36,12 +36,11 @@ def main():
     )
     # load it so we can see what it looks like
     config.load(file_path=config_file)
-
+    
     # override the configuration
     # override_config(config)
 
     its.test(test_config=config)
-
 
 def override_config(config: TestConfiguration):
     """Override the configuration for the tests"""

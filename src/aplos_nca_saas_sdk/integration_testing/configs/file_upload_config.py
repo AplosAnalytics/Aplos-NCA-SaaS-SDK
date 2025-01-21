@@ -7,17 +7,17 @@ Property of Aplos Analytics, Utah, USA
 import os
 from typing import List, Dict, Any
 from aplos_nca_saas_sdk.integration_testing.configs._config_base import ConfigBase
-from aplos_nca_saas_sdk.integration_testing.configs.login import Login
+from aplos_nca_saas_sdk.integration_testing.configs.login_config import LoginConfig, LoginConfigs
 from aplos_nca_saas_sdk.utilities.environment_services import EnvironmentServices
 
 
-class FileUpload(ConfigBase):
+class FileUploadConfig(ConfigBase):
     """
     File Upload: Defines the login that the application configuration tests will check against
 
     """
 
-    def __init__(self, login: Login, filepath: str):
+    def __init__(self, login: LoginConfig, filepath: str):
         super().__init__()
         if login is None:
             raise RuntimeError("Login is required")
@@ -27,7 +27,7 @@ class FileUpload(ConfigBase):
         self.__filepath = filepath
 
     @property
-    def login(self) -> Login:
+    def login(self) -> LoginConfig:
         """The users login"""
         return self.__login
 
@@ -56,7 +56,7 @@ class FileUpload(ConfigBase):
         return filepath
 
 
-class FileUploads(ConfigBase):
+class FileUploadConfigs(ConfigBase):
     """
     File Uploads: Defines the files that the application file upload tests will check against
 
@@ -64,16 +64,16 @@ class FileUploads(ConfigBase):
 
     def __init__(self):
         super().__init__()
-        self.__fileuploads: List[FileUpload] = []
+        self.__fileuploads: List[FileUploadConfig] = []
 
     @property
-    def list(self) -> List[FileUpload]:
+    def list(self) -> List[FileUploadConfig]:
         """List the file uploads"""
         return filter(lambda x: x.enabled, self.__fileuploads)
 
-    def add(self, *, filepath: str, login: Login, enabled: bool = True):
+    def add(self, *, filepath: str, login: LoginConfig, enabled: bool = True):
         """Add a file upload"""
-        fileupload = FileUpload(login, filepath)
+        fileupload = FileUploadConfig(login, filepath)
         fileupload.enabled = enabled
         self.__fileuploads.append(fileupload)
 
@@ -81,24 +81,14 @@ class FileUploads(ConfigBase):
         """Load the file uploads from a list of dictionaries"""
 
         super().load(test_config)
-        test_config_login: Login = self.try_load_login(test_config.get("login", None))
+        test_config_login: LoginConfig = LoginConfigs.try_load_login(test_config.get("login", None))
         fileuploads: List[Dict[str, Any]] = test_config.get("files", [])
-        login: Login = None
+        login: LoginConfig = None
         for fileupload in fileuploads:
             enabled = bool(fileupload.get("enabled", True))
             if "login" in fileupload:
-                login = self.try_load_login(fileupload["login"])
+                login = LoginConfigs.try_load_login(fileupload["login"])
             else:
                 login = test_config_login
 
             self.add(filepath=fileupload["file"], login=login, enabled=enabled)
-
-    def try_load_login(self, login_config: Dict[str, Any]) -> Login | None:
-        """Attempts to intialize a Login from a configuration object"""
-        login: Login = None
-        if login_config is not None:
-            username = login_config.get("username", None)
-            password = login_config.get("password", None)
-            domain = login_config.get("domain", None)
-            login = Login(username, password, domain)
-        return login

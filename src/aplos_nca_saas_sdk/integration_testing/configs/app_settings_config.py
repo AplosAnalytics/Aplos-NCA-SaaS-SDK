@@ -8,7 +8,7 @@ from typing import List, Dict, Any
 from aplos_nca_saas_sdk.integration_testing.configs._config_base import ConfigBase
 
 
-class ApplicationDomain(ConfigBase):
+class ApplicationDomainConfig(ConfigBase):
     """
     Application Domain: Defines the domains that the application configuration tests will check against
 
@@ -30,7 +30,7 @@ class ApplicationDomain(ConfigBase):
         self.__domain = value
 
 
-class ApplicationDomains(ConfigBase):
+class ApplicationDomainConfigs(ConfigBase):
     """
     Application ApplicationDomain: Defines the Domains that the application configuration tests will check against
 
@@ -38,16 +38,16 @@ class ApplicationDomains(ConfigBase):
 
     def __init__(self):
         super().__init__()
-        self.__domains: List[ApplicationDomain] = []
+        self.__domains: List[ApplicationDomainConfig] = []
 
     @property
-    def list(self) -> List[ApplicationDomain]:
+    def list(self) -> List[ApplicationDomainConfig]:
         """List the logins"""
         return self.__domains
 
     def add(self, *, domain: str, enabled: bool = True):
         """Add a loging"""
-        app_domain = ApplicationDomain()
+        app_domain = ApplicationDomainConfig()
         app_domain.domain = domain
         app_domain.enabled = enabled
         self.__domains.append(app_domain)
@@ -60,7 +60,7 @@ class ApplicationDomains(ConfigBase):
 
         domain: Dict[str, Any]
         for domain in domains:
-            app_domain = ApplicationDomain()
+            app_domain = ApplicationDomainConfig()
             app_domain.domain = domain.get("domain", None)
             app_domain.enabled = bool(domain.get("enabled", True))
 
@@ -75,10 +75,10 @@ class ApplicationSettings(ConfigBase):
 
     def __init__(self):
         super().__init__()
-        self.__domains: ApplicationDomains = ApplicationDomains()
+        self.__domains: ApplicationDomainConfigs = ApplicationDomainConfigs()
 
     @property
-    def domains(self) -> ApplicationDomains:
+    def domains(self) -> ApplicationDomainConfigs:
         """List of the domain"""
         return self.__domains
 

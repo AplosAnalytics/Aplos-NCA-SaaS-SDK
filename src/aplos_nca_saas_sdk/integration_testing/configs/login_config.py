@@ -8,7 +8,7 @@ from typing import List, Optional, Dict, Any
 from aplos_nca_saas_sdk.integration_testing.configs._config_base import ConfigBase
 
 
-class Login(ConfigBase):
+class LoginConfig(ConfigBase):
     """
     Application Login: Defines the login that the application configuration tests will check against
 
@@ -69,7 +69,7 @@ class Login(ConfigBase):
         self.__roles = value
 
 
-class Logins(ConfigBase):
+class LoginConfigs(ConfigBase):
     """
     Application Logins: Defines the logins that the application configuration tests will check against
 
@@ -77,16 +77,16 @@ class Logins(ConfigBase):
 
     def __init__(self):
         super().__init__()
-        self.__logins: List[Login] = []
+        self.__logins: List[LoginConfig] = []
 
     @property
-    def list(self) -> List[Login]:
+    def list(self) -> List[LoginConfig]:
         """List the logins"""
         return self.__logins
 
     def add(self, *, username: str, password: str, domain: str, enabled: bool = True):
         """Add a loging"""
-        login = Login()
+        login = LoginConfig()
         login.username = username
         login.password = password
         login.domain = domain
@@ -99,8 +99,18 @@ class Logins(ConfigBase):
         super().load(test_config)
         logins: List[Dict[str, str]] = test_config.get("logins", [])
         for login in logins:
-            self.add(
-                username=login["username"],
-                password=login["password"],
-                domain=login["domain"],
-            )
+            loginConfig = LoginConfigs.try_load_login(login)
+            self.__logins.append(loginConfig)
+    
+    @staticmethod
+    def try_load_login(login_config: Dict[str, Any]) -> LoginConfig | None:
+        """Attempts to intialize a Login from a configuration object"""
+        login: LoginConfig = None
+        if login_config is not None:
+            username = login_config.get("username", None)
+            password = login_config.get("password", None)
+            domain = login_config.get("domain", None)
+            enabled = login_config.get("enabled", True)
+            login = LoginConfig(username, password, domain)
+            login.enabled = enabled
+        return login

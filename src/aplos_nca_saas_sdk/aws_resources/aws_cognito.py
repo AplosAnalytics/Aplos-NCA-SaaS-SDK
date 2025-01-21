@@ -14,7 +14,7 @@ from aplos_nca_saas_sdk.nca_resources.nca_app_configuration import (
 )
 
 
-class CognitoAuthenication:
+class CognitoAuthentication:
     """
     Cognito Authentication
 

@@ -6,11 +6,12 @@ Property of Aplos Analytics, Utah, USA
 
 import json
 from typing import Any, Dict
-from aplos_nca_saas_sdk.integration_testing.configs.app_settings import (
+from aplos_nca_saas_sdk.integration_testing.configs.app_settings_config import (
     ApplicationSettings,
 )
-from aplos_nca_saas_sdk.integration_testing.configs.file_upload import FileUploads
-from aplos_nca_saas_sdk.integration_testing.configs.login import Logins
+from aplos_nca_saas_sdk.integration_testing.configs.file_upload_config import FileUploadConfigs
+from aplos_nca_saas_sdk.integration_testing.configs.login_config import LoginConfigs
+from aplos_nca_saas_sdk.integration_testing.configs.nca_execution_config import NCAExecutionConfigs
 
 
 class TestConfiguration:
@@ -21,8 +22,10 @@ class TestConfiguration:
 
     def __init__(self):
         self.app_config: ApplicationSettings = ApplicationSettings()
-        self.logins: Logins = Logins()
-        self.file_uploads: FileUploads = FileUploads()
+        self.logins: LoginConfigs = LoginConfigs()
+        self.file_uploads: FileUploadConfigs = FileUploadConfigs()
+        self.nca_executions: NCAExecutionConfigs = NCAExecutionConfigs()
+        
     def load(self, file_path: str):
         """
         Loads the configuration from a file
@@ -38,3 +41,4 @@ class TestConfiguration:
         self.logins.load(config.get("login_test", {}))
         self.app_config.load(config.get("application_config_test", {}))
         self.file_uploads.load(config.get("file_upload_test", {}))
+        self.nca_executions.load(config.get("analysis_execution_test", {}))
