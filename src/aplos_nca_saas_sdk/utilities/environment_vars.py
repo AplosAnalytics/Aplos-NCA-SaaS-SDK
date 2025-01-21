@@ -21,3 +21,10 @@ class EnvironmentVars:
             self.api_domain = self.api_domain.replace("https://", "")
 
         self.aplos_api_url = f"https://{self.api_domain}"
+
+    @staticmethod
+    def is_running_in_aws_lambda():
+        """
+        A quick way to check if we are running in an AWS Lambda Environment
+        """
+        return "AWS_LAMBDA_FUNCTION_NAME" in os.environ

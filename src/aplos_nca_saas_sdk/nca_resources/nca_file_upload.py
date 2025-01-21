@@ -29,11 +29,11 @@ class NCAFileUpload:
         if self.__api_domain is None:
             raise RuntimeError("Missing Aplos Api Domain")
 
-        url = HttpUtilities.build_url(self.__api_domain)
-        if isinstance(url, str):
-            return f"{url}/tenants/{self.__tenant_id}/users/{self.__user_id}"
+        url = HttpUtilities.build_url(
+            self.__api_domain, self.__tenant_id, self.__user_id
+        )
 
-        raise RuntimeError("Missing Aplos Api Domain")
+        return url
 
     def upload(self, input_file_path: str) -> Dict[str, Any]:
         """

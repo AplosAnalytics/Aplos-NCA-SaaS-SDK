@@ -17,7 +17,6 @@ from aplos_nca_saas_sdk.nca_resources.nca_app_configuration import (
 class CognitoAuthentication:
     """
     Cognito Authentication
-
     """
 
     def __init__(
@@ -73,6 +72,12 @@ class CognitoAuthentication:
         return self.__region
 
     def __validate_parameters(self) -> None:
+        """
+        Validate the required parameters.
+        We need either:
+          - the Cognito ClientId and Cognito Region
+          - or the Aplos Domain (which can get the clientId and region)
+        """
         if self.__client_id is None and self.__aplos_domain is not None:
             self.__config = NCAAppConfiguration(aplos_saas_domain=self.__aplos_domain)
             self.__client_id = self.__config.cognito_client_id
@@ -81,14 +86,12 @@ class CognitoAuthentication:
         if self.__client_id is None:
             raise RuntimeError(
                 "Missing Cognito Client Id. "
-                "Pass in a client_id as a command arg or set the COGNITO_CLIENT_ID enviornment var. "
                 "Alternatively, set the aplos_domain to automatically get the client_id and region."
             )
 
         if self.__region is None:
             raise RuntimeError(
                 "Missing Cognito Region"
-                "Pass in a region as a command arg or set the COGNITO_REGION enviornment var. "
                 "Alternatively, set the aplos_domain to automatically get the client_id and region."
             )
 
@@ -139,13 +142,16 @@ class CognitoAuthentication:
             self.__parse_jwt(self.__jwt)
             return self.__jwt
 
-        raise RuntimeError("Failed to get a JWT token")
+        raise RuntimeError(
+            "Failed to get a JWT token.  Check the error logs for more information."
+        )
 
     def __parse_jwt(self, encoded_jwt: str) -> None:
         # Decode the payload (second part) from Base64
         decoded_jwt: dict = jwt_lib.decode(
             encoded_jwt, options={"verify_signature": False}
         )
+        # custom fields contain information we'll need for later requests
         self.__user_id = decoded_jwt.get("custom:aplos_user_id")
         self.__tenant_id = decoded_jwt.get("custom:aplos_user_tenant_id")
 

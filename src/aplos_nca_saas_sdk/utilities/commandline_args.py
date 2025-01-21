@@ -36,16 +36,9 @@ class CommandlineArgs:
         )
 
         self.parser.add_argument("-a", "--api-url", required=False, help="The api url")
-        self.parser.add_argument(
-            "-i", "--client-id", required=False, help="The client id to cognito"
-        )
 
         self.parser.add_argument(
             "-v", "--verbose", required=False, help="Detailed logging information"
-        )
-
-        self.parser.add_argument(
-            "-r", "--region", required=False, help="AWS Region. For Cognito Login"
         )
 
         self.parser.add_argument(
@@ -69,12 +62,12 @@ class CommandlineArgs:
             help="The full path to an environment file (.env file).",
         )
 
+        # auth information
         self.username: str | None = None
         self.password: str | None = None
         self.api_domain: str | None = None
-        self.cognito_client_id: str | None = None
-        self.aws_region: str | None = None
 
+        # excuction setup
         self.config_file: str | None = None
         self.config_file_default: str | None = None
         self.analysis_file: str | None = None
@@ -103,8 +96,7 @@ class CommandlineArgs:
         # anything with a dash (in the args) is accessed with an underscore
         self.analysis_file = args.analyis_file
         self.api_domain = args.api_domain
-        self.cognito_client_id = args.client_id
-        self.aws_region = args.region
+
         self.metadata_file = args.metadata_file
         self.skip = args.skip
         self.output_directory = args.output_directory
@@ -128,24 +120,12 @@ class CommandlineArgs:
                 self.password = self.prompt_for_input(
                     "password", env.password, is_sensitive=True
                 )
-        if not self.aws_region:
-            if self.skip and env.aws_region:
-                self.aws_region = env.aws_region
-            else:
-                self.aws_region = self.prompt_for_input("AWS Region", env.aws_region)
+
         if not self.api_domain:
             if self.skip and env.api_domain:
                 self.api_domain = env.api_domain
             else:
                 self.api_domain = self.prompt_for_input("Api Domain", env.api_domain)
-
-        if not self.cognito_client_id:
-            if self.skip and env.client_id:
-                self.cognito_client_id = env.client_id
-            else:
-                self.cognito_client_id = self.prompt_for_input(
-                    "Cognito Client Id", env.client_id
-                )
 
         if not self.analysis_file:
             if self.skip and self.analysis_file_default or env.analysis_file:
@@ -196,8 +176,6 @@ class CommandlineArgs:
         required_fields = [
             self.username,
             self.password,
-            self.aws_region,
-            self.cognito_client_id,
             self.analysis_file,
             self.config_file,
             self.api_domain,
@@ -314,9 +292,9 @@ def main():
         pwd = "************" if args.password else "empty"
         print(f"username = {args.username}")
         print(f"password = {pwd}")
-        print(f"aws_region = {args.aws_region}")
+
         print(f"api_domain = {args.api_domain}")
-        print(f"cognito_client_id = {args.cognito_client_id}")
+
         print(f"config_file = {args.config_file}")
         print(f"metadata_file = {args.metadata_file}")
         print(f"analysis_file = {args.analysis_file}")

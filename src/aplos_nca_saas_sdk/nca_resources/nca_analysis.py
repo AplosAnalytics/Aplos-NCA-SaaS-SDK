@@ -11,7 +11,7 @@ import zipfile
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict
-
+from aws_lambda_powertools import Logger
 import requests
 
 from aplos_nca_saas_sdk.aws_resources.aws_cognito import CognitoAuthentication
@@ -20,29 +20,40 @@ from aplos_nca_saas_sdk.aws_resources.aws_s3_presigned_upload import (
 )
 from aplos_nca_saas_sdk.utilities.commandline_args import CommandlineArgs
 from aplos_nca_saas_sdk.utilities.http_utility import HttpUtilities, Routes
+from aplos_nca_saas_sdk.utilities.environment_vars import EnvironmentVars
+
+logger = Logger()
 
 
-class NCAExecution:
-    """NCA Engine Access"""
+class NCAAnalysis:
+    """NCA Analysis API Access"""
 
-    def __init__(
-        self, api_domain: str | None, cognito_client_id: str | None, region: str | None
-    ) -> None:
-        self.jwt: str
-        self.access_token: str | None = None
-        self.refresh_token: str | None = None
-        self.__api_domain: str | None = api_domain
+    def __init__(self, api_domain: str) -> None:
+        self.__jwt: str
+
+        if not api_domain:
+            raise ValueError("Missing Aplos Api Domain")
+
+        self.__api_domain: str = api_domain
         self.verbose: bool = False
+        self.__cognito: CognitoAuthentication | None = None
 
-        self.cognito: CognitoAuthentication = CognitoAuthentication(
-            client_id=cognito_client_id, region=region, aplos_domain=api_domain
-        )
+    @property
+    def cognito(self) -> CognitoAuthentication:
+        """Gets the cognito authentication object"""
 
         if not self.__api_domain:
             raise RuntimeError(
-                "Missing Aplos Api Domain. "
-                "Pass in the api_domain as a command arg or set the APLOS_API_DOMAIN environment var."
+                "Missing Aplos Api Domain. Set the internal property of __api_domain first."
+                "This is required to make an authentication connection"
             )
+
+        if self.__cognito is None:
+            self.__cognito: CognitoAuthentication = CognitoAuthentication(
+                client_id=None, region=None, aplos_domain=self.__api_domain
+            )
+
+        return self.__cognito
 
     @property
     def api_root(self) -> str:
@@ -50,13 +61,11 @@ class NCAExecution:
         if self.__api_domain is None:
             raise RuntimeError("Missing Aplos Api Domain")
 
-        url = HttpUtilities.build_url(self.__api_domain)
-        if isinstance(url, str):
-            return (
-                f"{url}/tenants/{self.cognito.tenant_id}/users/{self.cognito.user_id}"
-            )
+        url = HttpUtilities.build_url(
+            self.__api_domain, self.cognito.tenant_id, self.cognito.user_id
+        )
 
-        raise RuntimeError("Missing Aplos Api Domain")
+        return url
 
     def execute(
         self,
@@ -67,10 +76,14 @@ class NCAExecution:
         *,
         meta_data: str | dict | None = None,
         wait_for_results: bool = True,
+        max_wait_in_seconds: int = 900,
         output_directory: str | None = None,
         unzip_after_download: bool = False,
-    ) -> str | None:
-        """_summary_
+    ) -> Dict[str, Any]:
+        """
+        Executes an analsysis.
+            - Uploads an analysis file.
+            - Adds the execution to the queue.
 
         Args:
             username (str): the username
@@ -79,53 +92,85 @@ class NCAExecution:
             config_data (dict): analysis configuration information
             meta_data (str | dict | None, optional): meta data attached to the execution. Defaults to None.
             wait_for_results (bool, optional): should the program wait for results. Defaults to True.
+            max_wait_in_seconds (int optional): the max time to wait for a download
             output_directory (str, optional): the output directory. Defaults to None (the local directory is used)
             unzip_after_download (bool): Results are downloaded as a zip file, this option will unzip them automatically.  Defaults to False
-        """
-        if self.verbose:
-            print("\tLogging in.")
-        self.jwt = self.cognito.login(username=username, password=password)
 
-        if self.verbose:
-            print("\tUploading the analysis file.")
-        uploader: S3PresignedUpload = S3PresignedUpload(self.jwt, str(self.api_root))
+        Returns:
+            Dict[str, Any]: The execution response.  If you wait for the completion
+        """
+
+        self.log(f"\tLogging into {self.__api_domain}.")
+
+        if not username:
+            raise ValueError("Missing username.  Please provide a valid username.")
+        if not password:
+            raise ValueError("Missing password.  Please provide a valid password.")
+
+        self.__jwt = self.cognito.login(username=username, password=password)
+
+        self.log("\tUploading the analysis file.")
+        uploader: S3PresignedUpload = S3PresignedUpload(self.__jwt, str(self.api_root))
         upload_response: Dict[str, Any] = uploader.upload_file(input_file_path)
 
-        if self.verbose:
-            print("\tStarting the execution.")
-        execution_id = self.run_analysis(
-            file_id=upload_response.get("file_id", ""),
+        file_id: str = upload_response.get("file_id", "")
+        if not file_id:
+            raise RuntimeError(
+                "Unexpected empty file_id when attempting to upload file."
+            )
+
+        self.log("\tAdding analyis to the queue.")
+        execution_response: Dict[str, Any] = self.__add_to_queue(
+            file_id=file_id,
             config_data=config_data,
             meta_data=meta_data,
         )
 
-        if execution_id and wait_for_results:
+        execution_id: str = execution_response.get("execution_id", "")
+
+        response = {
+            "execution": execution_response,
+            "upload": upload_response,
+            "results": {"file": None},
+        }
+
+        if not execution_id:
+            raise RuntimeError(
+                "Unexpected empty execution_id when attempting to execute analysis."
+            )
+
+        if wait_for_results:
             # wait for it
-            download_url = self.wait_for_results(execution_id=execution_id)
+            download_url = self.wait_for_results(
+                execution_id=execution_id, max_wait_in_seconds=max_wait_in_seconds
+            )
             # download the files
             if download_url is None:
-                raise RuntimeError("Unexpected empty download_url when attempting to download results.")
+                raise RuntimeError(
+                    "Unexpected empty download_url when attempting to download results."
+                )
             else:
-                if self.verbose:
-                    print("\tDownloading the results.")
-                return self.download_file(
+                self.log("\tDownloading the results.")
+                file_path = self.download_file(
                     download_url,
                     output_directory=output_directory,
                     do_unzip=unzip_after_download,
                 )
-        else:
-            if self.verbose:
-                print("\Bypassed results download.")
-            return None
 
-    def run_analysis(
+                response["results"]["file"] = file_path
+        else:
+            self.log("Bypassed results download.")
+
+        return response
+
+    def __add_to_queue(
         self,
         file_id: str,
         config_data: dict,
         meta_data: str | dict | None = None,
-    ) -> str:
+    ) -> Dict[str, Any]:
         """
-        Run the analysis
+        Adds the analysis to the execution queue.
 
         Args:
             bucket_name (str): s3 bucket name for your organization. this is returned to you
@@ -133,7 +178,7 @@ class NCAExecution:
             config_data (dict): the config_data for the analysis file
             meta_data (str | dict): Optional.  Any meta data you'd like attached to this execution
         Returns:
-            str: the execution id
+            Dict[str, Any]: the api response
         """
 
         if not file_id:
@@ -143,7 +188,7 @@ class NCAExecution:
             raise ValueError(
                 "Missing config_data.  Please provide a valid config_data."
             )
-        headers = HttpUtilities.get_headers(self.jwt)
+        headers = HttpUtilities.get_headers(self.__jwt)
         # to start a new execution we need the location of the file (s3 bucket and object key)
         # you basic configuration
         # optional meta data
@@ -172,13 +217,13 @@ class NCAExecution:
             )
 
         execution_id = str(json_response.get("execution_id"))
-        if self.verbose:
-            print(f"\tExecution {execution_id} started.")
 
-        return execution_id
+        self.log(f"\tExecution {execution_id} started.")
+
+        return json_response
 
     def wait_for_results(
-        self, execution_id: str, max_wait_in_minutes: int = 15
+        self, execution_id: str, max_wait_in_seconds: float = 900
     ) -> str | None:
         """
         Wait for results
@@ -191,10 +236,10 @@ class NCAExecution:
 
         url = f"{self.api_root}/{Routes.NCA_EXECUTIONS}/{execution_id}"
 
-        headers = HttpUtilities.get_headers(self.jwt)
+        headers = HttpUtilities.get_headers(self.__jwt)
         current_time = datetime.now()
         # Create a timedelta object representing 15 minutes
-        time_delta = timedelta(minutes=max_wait_in_minutes)
+        time_delta = timedelta(seconds=max_wait_in_seconds)
 
         # Add the timedelta to the current time
         max_time = current_time + time_delta
@@ -211,8 +256,7 @@ class NCAExecution:
             if status == "failed" or complete:
                 break
             if not complete:
-                if self.verbose:
-                    print(f"\t\twaiting for results.... {status}: {elapsed}")
+                self.log(f"\t\twaiting for results.... {status}: {elapsed}")
                 time.sleep(5)
             if datetime.now() > max_time:
                 status = "timeout"
@@ -223,12 +267,13 @@ class NCAExecution:
                 break
 
         if status == "complete":
-            if self.verbose:
-                print("\tExecution complete.")
-                print(f"\tExecution duration = {elapsed}.")
+            self.log("\tExecution complete.")
+            self.log(f"\tExecution duration = {elapsed}.")
             return json_response["presigned"]["url"]
         else:
-            raise RuntimeError(f"\tExecution failed. Execution ID = {execution_id}. reason: {json_response.get('errors')}")
+            raise RuntimeError(
+                f"\tExecution failed. Execution ID = {execution_id}. reason: {json_response.get('errors')}"
+            )
 
     def download_file(
         self,
@@ -251,6 +296,16 @@ class NCAExecution:
             output_directory = str(Path(__file__).parent.parent)
             output_directory = os.path.join(output_directory, ".aplos-nca-output")
 
+        if EnvironmentVars.is_running_in_aws_lambda():
+            # /tmp is the only directory we can write to unless we mount an external drive
+            # TODO: allow for external mapped drives, perhaps test if we can write to it
+
+            output_directory = os.path.join("/tmp", ".aplos-nca-output")
+
+            self.log(
+                f"\t\tRunning in AWS Lambda.  Setting output directory to {output_directory}"
+            )
+
         output_file = f"results-{time.strftime('%Y-%m-%d-%Hh%Mm%Ss')}.zip"
 
         output_file = os.path.join(output_directory, output_file)
@@ -268,11 +323,20 @@ class NCAExecution:
 
         unzipped_state = "and unzipped" if do_unzip else "in zip format"
 
-        if self.verbose:
-            print(f"\tResults file downloaded {unzipped_state}.")
-            print(f"\t\tResults are available in: {output_directory}")
+        self.log(f"\tResults file downloaded {unzipped_state}.")
+        self.log(f"\t\tResults are available in: {output_directory}")
 
         return output_file
+
+    def log(self, message: str | Dict[str, Any]):
+        """Log the message"""
+        logger.debug(message)
+
+        if isinstance(message, dict):
+            message = json.dumps(message, indent=2)
+
+        if self.verbose:
+            print(message)
 
 
 def main():
@@ -291,10 +355,8 @@ def main():
             print("Missing some arguments.")
             exit()
 
-        engine = NCAExecution(
-            api_domain=args.api_domain,
-            cognito_client_id=args.cognito_client_id,
-            region=args.aws_region,
+        engine = NCAAnalysis(
+            api_domain=str(args.api_domain),
         )
 
         print("\tLoading analysis configurations")

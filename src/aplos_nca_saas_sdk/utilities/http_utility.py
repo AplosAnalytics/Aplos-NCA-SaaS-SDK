@@ -1,3 +1,12 @@
+"""
+Copyright 2024 Aplos Analytics
+All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
+Property of Aplos Analytics, Utah, USA
+"""
+
+from typing import Optional
+
+
 class Routes:
     """NCA Saas Routes"""
 
@@ -9,13 +18,20 @@ class HttpUtilities:
     """Http Utilties"""
 
     @staticmethod
-    def build_url(domain_name: str) -> str:
+    def build_url(
+        domain_name: str, tenant_id: Optional[str] = None, user_id: Optional[str] = None
+    ) -> str:
         """Build the url"""
-        domain_name = domain_name.strip()
-        if domain_name.startswith("http"):
-            return domain_name
-        else:
-            return f"https://{domain_name}"
+        url = domain_name.strip()
+        if not domain_name.startswith("http"):
+            url = f"https://{domain_name}"
+
+        if tenant_id:
+            url = f"{url}/tenants/{tenant_id}"
+            if user_id:
+                url = f"{url}/users/{user_id}"
+
+        return url
 
     @staticmethod
     def get_headers(jwt: str) -> dict:
