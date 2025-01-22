@@ -26,7 +26,7 @@ class TestAppConfiguration(IntegrationTestBase):
         """Test loading the application configuration"""
 
         self.results.clear()
-        for domain_config in self.config.app_config.domains.list:
+        for domain_config in self.config.app_config.hosts.list:
             config: NCAAppConfiguration = NCAAppConfiguration(domain_config.host)
 
             test_response: IntegrationTestResponse = IntegrationTestResponse()

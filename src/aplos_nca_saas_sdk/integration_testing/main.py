@@ -57,8 +57,8 @@ def override_config(config: TestConfiguration):
     config.logins.list.clear()
     config.logins.add(username=username, password=password, host=host)
 
-    config.app_config.domains.list.clear()
-    config.app_config.domains.add(host=host)
+    config.app_config.hosts.list.clear()
+    config.app_config.hosts.add(host=host)
 
 
 if __name__ == "__main__":

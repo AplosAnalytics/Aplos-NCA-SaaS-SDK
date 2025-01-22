@@ -1,7 +1,7 @@
 {
     "application_config_test": {
         "purpose": "Tests the application configuration endpoints",
-        "domains": [
+        "hosts": [
             {
                 "host": "api.example.com",
                 "expected_results": {

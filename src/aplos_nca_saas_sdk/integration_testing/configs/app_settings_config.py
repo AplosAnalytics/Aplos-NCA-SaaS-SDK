@@ -10,7 +10,7 @@ from aplos_nca_saas_sdk.integration_testing.configs._config_base import ConfigBa
 
 class ApplicationHostConfig(ConfigBase):
     """
-    Application host: Defines the domains that the application configuration tests will check against
+    Application host: Defines the hosts that the application configuration tests will check against
 
     """
 
@@ -30,9 +30,9 @@ class ApplicationHostConfig(ConfigBase):
         self.__host = value
 
 
-class ApplicationDomainConfigs(ConfigBase):
+class ApplicationHostConfigs(ConfigBase):
     """
-    Application ApplicationDomain: Defines the Domains that the application configuration tests will check against
+    Application ApplicationHost: Defines the hosts that the application configuration tests will check against
 
     """
 
@@ -56,10 +56,10 @@ class ApplicationDomainConfigs(ConfigBase):
         """Load the logins from a list of dictionaries"""
         # self.enabled = bool(test_config.get("enabled", True))
         super().load(test_config)
-        domains: List[Dict[str, Any]] = test_config.get("domains", [])
+        hosts: List[Dict[str, Any]] = test_config.get("hosts", [])
 
         host: Dict[str, Any]
-        for host in domains:
+        for host in hosts:
             app_domain = ApplicationHostConfig()
             app_domain.host = host.get("host", None)
             app_domain.enabled = bool(host.get("enabled", True))
@@ -69,20 +69,20 @@ class ApplicationDomainConfigs(ConfigBase):
 
 class ApplicationSettings(ConfigBase):
     """
-    Application Settings: Defines the domains that the application settings (configuration endpoint) tests will check against
+    Application Settings: Defines the hosts that the application settings (configuration endpoint) tests will check against
 
     """
 
     def __init__(self):
         super().__init__()
-        self.__hosts: ApplicationDomainConfigs = ApplicationDomainConfigs()
+        self.__hosts: ApplicationHostConfigs = ApplicationHostConfigs()
 
     @property
-    def domains(self) -> ApplicationDomainConfigs:
+    def hosts(self) -> ApplicationHostConfigs:
         """List of the host"""
         return self.__hosts
 
     def load(self, test_config: Dict[str, Any]):
-        """Load the domains from the config"""
+        """Load the hosts from the config"""
         super().load(test_config)
-        self.domains.load(test_config)
+        self.hosts.load(test_config)
