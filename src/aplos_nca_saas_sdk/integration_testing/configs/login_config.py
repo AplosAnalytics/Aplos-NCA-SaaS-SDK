@@ -95,17 +95,19 @@ class LoginConfigs(ConfigBase):
 
     def load(self, test_config: Dict[str, Any]):
         """Load the logins from a list of dictionaries"""
-        # self.enabled = bool(test_config.get("enabled", True))
+
         super().load(test_config)
         logins: List[Dict[str, str]] = test_config.get("logins", [])
         for login in logins:
-            loginConfig = LoginConfigs.try_load_login(login)
-            self.__logins.append(loginConfig)
-    
+            login_config = LoginConfigs.try_load_login(login)
+            if login_config is None:
+                continue
+            self.__logins.append(login_config)
+
     @staticmethod
     def try_load_login(login_config: Dict[str, Any]) -> LoginConfig | None:
         """Attempts to intialize a Login from a configuration object"""
-        login: LoginConfig = None
+        login: LoginConfig | None = None
         if login_config is not None:
             username = login_config.get("username", None)
             password = login_config.get("password", None)

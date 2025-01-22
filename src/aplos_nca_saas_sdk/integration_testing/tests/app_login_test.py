@@ -39,7 +39,7 @@ class TestAppLogin(IntegrationTestBase):
                 token = nca_login.authenticate(
                     username=login.username, password=login.password
                 )
-                test_response.response = token
+
                 if not token:
                     test_response.error = "Failed to authenticate"
 

@@ -95,14 +95,14 @@ class NCAExecutionConfigs(ConfigBase):
     @property
     def list(self) -> List[NCAExecutionConfig]:
         """List the nca execution configurations"""
-        return filter(lambda x: x.enabled, self.__nca_executions)
+        return list(filter(lambda x: x.enabled, self.__nca_executions))
 
     def add(
         self,
         *,
         login: LoginConfig,
         input_file_path: str,
-        config_data: str | dict,
+        config_data: dict,
         meta_data: str | dict | None = None,
         output_dir: str | None = None,
         unzip_after_download: bool = False,
@@ -125,14 +125,14 @@ class NCAExecutionConfigs(ConfigBase):
 
         super().load(test_config)
 
-        base_login: LoginConfig = LoginConfigs.try_load_login(
+        base_login: LoginConfig | None = LoginConfigs.try_load_login(
             test_config.get("login", None)
         )
         base_output_dir: str = test_config.get("output_dir", None)
         analyses: List[Dict[str, Any]] = test_config.get("analyses", [])
         for analysis in analyses:
             enabled = bool(analysis.get("enabled", True))
-
+            login: LoginConfig | None = None
             if "login" in analysis:
                 login = LoginConfigs.try_load_login(analysis["login"])
             else:
@@ -142,6 +142,9 @@ class NCAExecutionConfigs(ConfigBase):
                 output_dir = analysis["output_dir"]
             else:
                 output_dir = base_output_dir
+
+            if not login:
+                raise RuntimeError("Failed to load the login configuration")
 
             self.add(
                 login=login,

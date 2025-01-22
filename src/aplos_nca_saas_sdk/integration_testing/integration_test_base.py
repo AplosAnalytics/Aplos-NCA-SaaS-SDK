@@ -21,10 +21,17 @@ class IntegrationTestBase(ABC):
     """
 
     def __init__(self, name: str | None = None, index: int = 0):
-        self.name = name
+        self.__name = name
         self.index = index
         self.__config: TestConfiguration = TestConfiguration()
         self.__results: List[IntegrationTestResponse] = []
+
+    @property
+    def name(self) -> str:
+        """
+        Get the name of the test
+        """
+        return self.__name if self.__name is not None else self.__class__.__name__
 
     @property
     def config(self) -> TestConfiguration:

@@ -6,7 +6,7 @@ Property of Aplos Analytics, Utah, USA
 
 import time
 from datetime import datetime, timedelta
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 import requests
 from aws_lambda_powertools import Logger
@@ -35,28 +35,31 @@ class FileUploadTest(IntegrationTestBase):
 
         self.results.clear()
 
-        for fileupload in self.config.file_uploads.list:
+        for file_upload in self.config.file_uploads.list:
             test_response: IntegrationTestResponse = IntegrationTestResponse()
             test_response.name = self.name
             try:
                 # Confirm Login
-                nca_login = self.__login(fileupload.login)
+                nca_login = self.__login(file_upload.login)
                 if not nca_login.jwt:
                     test_response.error = "Failed to authenticate"
                 else:
                     # Confirm Upload
                     upload_response: Dict[str, Any] = self.__upload(
-                        nca_login, fileupload.filepath
+                        nca_login, file_upload.file_path
                     )
                     if upload_response is None:
                         test_response.error = "Failed to upload"
                     else:
                         # Confirm conversion and download
                         # Allow time buffer so file data is available
+                        file_id: str = upload_response.get("file_id", "")
+                        if not file_id:
+                            raise RuntimeError(
+                                "Failed to get a file_id from the upload"
+                            )
                         time.sleep(3)
-                        self.__download(
-                            nca_login, upload_response.get("file_id"), test_response
-                        )
+                        self.__download(nca_login, file_id, test_response)
 
             except Exception as e:  # pylint: disable=w0718
                 test_response.error = str(e)
@@ -108,7 +111,7 @@ class FileUploadTest(IntegrationTestBase):
         while not complete:
             response = requests.get(file_info_endpoint, headers=headers, timeout=60)
             json_response: dict = response.json()
-            errors = []
+            errors: List[Dict[str, Any]] = []
             errors.extend(json_response.get("errors") or [])
             status = json_response.get("workable_state")
             complete = status == "ready"
