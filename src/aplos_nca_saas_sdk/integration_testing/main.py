@@ -47,18 +47,18 @@ def override_config(config: TestConfiguration):
     """Override the configuration for the tests"""
     username = os.getenv("TEST_USERNAME")
     password = os.getenv("TEST_PASSWORD")
-    domain = os.getenv("TEST_DOMAIN")
+    host = os.getenv("TEST_HOST")
 
-    if not username or not password or not domain:
+    if not username or not password or not host:
         raise RuntimeError(
-            "TEST_USERNAME, TEST_PASSWORD, and TEST_DOMAIN must be set in the environment"
+            "TEST_USERNAME, TEST_PASSWORD, and TEST_HOST must be set in the environment"
         )
 
     config.logins.list.clear()
-    config.logins.add(username=username, password=password, domain=domain)
+    config.logins.add(username=username, password=password, host=host)
 
     config.app_config.domains.list.clear()
-    config.app_config.domains.add(domain=domain)
+    config.app_config.domains.add(host=host)
 
 
 if __name__ == "__main__":

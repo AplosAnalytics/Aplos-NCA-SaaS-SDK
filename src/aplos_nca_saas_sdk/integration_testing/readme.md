@@ -9,7 +9,7 @@ The integration tests will require the following:
 ### Environment Vars
 |Variable Name|Description|
 |--|--|
-|APLOS_API_DOMAIN|The full domain. e.g. app.aplos-nca.com| 
+|APLOS_host|The full host name. e.g. app.aplos-nca.com| 
 
 
 ### Users

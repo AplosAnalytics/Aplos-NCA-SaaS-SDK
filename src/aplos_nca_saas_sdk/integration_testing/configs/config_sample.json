@@ -3,14 +3,14 @@
         "purpose": "Tests the application configuration endpoints",
         "domains": [
             {
-                "domain": "api.example.com",
+                "host": "api.example.com",
                 "expected_results": {
                     "status_code": 200
                 },
                 "enabled": true
             },
             {
-                "domain": "XXXXXXXXXXXXXXXXXXXXX",
+                "host": "XXXXXXXXXXXXXXXXXXXXX",
                 "expected_results": {
                     "status_code": 403
                 },
@@ -24,13 +24,13 @@
             {
                 "username": "foo",
                 "password": "barr",
-                "domain": "api.example.com",
+                "host": "api.example.com",
                 "roles": []
             },
             {
                 "username": "XXXXXXXXXXXXXXXXXXXXX",
                 "password": "XXXXXXXXXXXXXXXXXXXXX",
-                "domain": "XXXXXXXXXXXXXXXXXXXXX",
+                "host": "XXXXXXXXXXXXXXXXXXXXX",
                 "roles": [
                     "XXXXXXXXXXXXXXXXXXXXX"
                 ],
@@ -48,7 +48,7 @@
             "purpose": "optional: if present this login is used, unless a specific login is defined for the test",
             "username": "foo",
             "password": "bar",
-            "domain": "api.example.com"
+            "host": "api.example.com"
         },
         "files": [
             {
@@ -60,7 +60,7 @@
                     "purpose": "optional: if present tests an upload for a specific user",
                     "username": "XXXXXXXXXXXXXXXXXXXXX",
                     "password": "XXXXXXXXXXXXXXXXXXXXX",
-                    "domain": "XXXXXXXXXXXXXXXXXXXXX"
+                    "host": "XXXXXXXXXXXXXXXXXXXXX"
                 }
             }
         ]
@@ -70,7 +70,7 @@
         "login": {
             "username": "XXXXXXXXXXXXXXXXXXXXX",
             "password": "XXXXXXXXXXXXXXXXXXXXX",
-            "domain": "XXXXXXXXXXXXXXXXXXXXX"
+            "host": "XXXXXXXXXXXXXXXXXXXXX"
         },
         "output_dir": "XXXXXXXXXXXXXXXXXXXXX",
         "analyses": [
@@ -90,7 +90,7 @@
                 "login": {
                     "username": "XXXXXXXXXXXXXXXXXXXXX",
                     "password": "XXXXXXXXXXXXXXXXXXXXX",
-                    "domain": "XXXXXXXXXXXXXXXXXXXXX"
+                    "host": "XXXXXXXXXXXXXXXXXXXXX"
                 },
                 "expected_results": {
                     "status_code": 200
@@ -103,7 +103,7 @@
         "login": {
             "username": "XXXXXXXXXXXXXXXXXXXXX",
             "password": "XXXXXXXXXXXXXXXXXXXXX",
-            "domain": "XXXXXXXXXXXXXXXXXXXXX"
+            "host": "XXXXXXXXXXXXXXXXXXXXX"
         },
         "expected_results": {
             "status_code": 200

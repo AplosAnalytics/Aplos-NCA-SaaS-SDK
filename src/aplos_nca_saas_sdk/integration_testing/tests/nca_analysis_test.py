@@ -48,7 +48,7 @@ class NCAAnalysisTest(IntegrationTestBase):
             try:
                 # Create new NCA Execution
                 nca_execution: NCAAnalysis = NCAAnalysis(
-                    nca_execution_config.login.domain
+                    nca_execution_config.login.host
                 )
 
                 # Initialize Configuration Data

@@ -27,10 +27,10 @@ class TestAppConfiguration(IntegrationTestBase):
 
         self.results.clear()
         for domain_config in self.config.app_config.domains.list:
-            config: NCAAppConfiguration = NCAAppConfiguration(domain_config.domain)
+            config: NCAAppConfiguration = NCAAppConfiguration(domain_config.host)
 
             test_response: IntegrationTestResponse = IntegrationTestResponse()
-            test_response.meta = {"domain": domain_config}
+            test_response.meta = {"host": domain_config}
 
             if not domain_config.enabled or not self.config.app_config.enabled:
                 test_response.skipped = True

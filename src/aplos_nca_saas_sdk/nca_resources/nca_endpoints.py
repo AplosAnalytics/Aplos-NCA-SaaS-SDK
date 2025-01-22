@@ -8,51 +8,77 @@ Property of Aplos Analytics, Utah, USA
 class NCAEndpoints:
     """Aplos NCA SaaS Endpoints"""
 
-    def __init__(self, *, aplos_saas_domain: str):
-        self.__domain: str = aplos_saas_domain
+    def __init__(
+        self, *, host: str, tenant_id: str | None = None, user_id: str | None = None
+    ):
+        self.__host: str = host
         self.__protocal: str = "https://"
+        self.tenant_id: str | None = tenant_id
+        self.user_id: str | None = user_id
 
-    def __base(self, tenant_id: str | None = None, user_id: str | None = None) -> str:
-        """Returns the base endpoint"""
-        route = f"{self.__protocal}{self.__domain}"
+    @property
+    def origin(self) -> str:
+        """The origin path e.g. https://api.aplos-nca.com"""
+        base = f"{self.__protocal}{self.__host}"
+        return base
 
-        if tenant_id:
-            route = f"{route}/tenants/{tenant_id}"
-        if user_id:
-            if not tenant_id:
-                raise ValueError("Tenant ID is required on the users path")
-            route = f"{route}/users/{user_id}"
+    @property
+    def tenant_path(self) -> str:
+        """Returns the tenant path"""
 
-        return route
+        if not self.tenant_id:
+            raise ValueError("Missing Tenant Id")
 
-    def tenant(self, tenant_id: str) -> str:
+        return f"{self.origin}/tenants/{self.tenant_id}"
+
+    @property
+    def user_path(self) -> str:
+        """Returns the user path"""
+
+        if not self.user_id:
+            raise ValueError("Missing User Id")
+        return f"{self.tenant_path}/users/{self.user_id}"
+
+    @property
+    def tenant(self) -> str:
         """Returns the tenant endpoint"""
-        return f"{self.__base(tenant_id=tenant_id)}"
+        return f"{self.tenant_path}"
 
+    @property
     def app_configuration(self) -> str:
-        """Returns the configuration endpoint"""
-        return f"{self.__base()}/app/configuration"
+        """
+        Returns the configuration endpoint.  This is a public endpoint.
+        """
+        return f"{self.origin}/app/configuration"
 
-    def user(self, tenant_id: str, user_id: str) -> str:
+    @property
+    def user(self) -> str:
         """Returns the user endpoint"""
-        return f"{self.__base(tenant_id=tenant_id, user_id=user_id)}"
+        return f"{self.user_path}"
 
-    def executions(self, tenant_id: str, user_id: str) -> str:
+    @property
+    def executions(self) -> str:
         """Returns the executions endpoint"""
-        return f"{self.__base(tenant_id=tenant_id, user_id=user_id)}/nca/executions"
+        return f"{self.user_path}/nca/executions"
 
-    def execution(self, tenant_id: str, user_id: str, execution_id: str) -> str:
+    def execution(self, execution_id: str) -> str:
         """Returns the executions endpoint"""
-        return f"{self.executions(tenant_id=tenant_id, user_id=user_id)}/{execution_id}"
+        return f"{self.executions}/{execution_id}"
 
-    def files(self, tenant_id: str, user_id: str) -> str:
+    @property
+    def validations(self) -> str:
+        """Returns the validations endpoint"""
+        return f"{self.user_path}/nca/validations"
+
+    @property
+    def files(self) -> str:
         """Returns the files endpoint"""
-        return f"{self.__base(tenant_id=tenant_id, user_id=user_id)}/nca/files"
+        return f"{self.user_path}/nca/files"
 
-    def file(self, tenant_id: str, user_id: str, file_id: str) -> str:
+    def file(self, file_id: str) -> str:
         """Returns the file endpoint"""
-        return f"{self.files(tenant_id=tenant_id, user_id=user_id)}/{file_id}"
+        return f"{self.files}/{file_id}"
 
-    def file_data(self, tenant_id: str, user_id: str, file_id: str) -> str:
+    def file_data(self, file_id: str) -> str:
         """Returns get file data endpoint"""
-        return f"{self.__base(tenant_id=tenant_id, user_id=user_id)}/nca/files/{file_id}/data"
+        return f"{self.files}/{file_id}/data"

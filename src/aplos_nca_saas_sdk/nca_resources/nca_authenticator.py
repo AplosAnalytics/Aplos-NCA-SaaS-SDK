@@ -5,21 +5,21 @@ Property of Aplos Analytics, Utah, USA
 """
 
 from typing import Optional
-from aplos_nca_saas_sdk.aws_resources.aws_cognito import CognitoAuthentication
+from aplos_nca_saas_sdk.nca_resources.aws_cognito import CognitoAuthentication
 from aplos_nca_saas_sdk.nca_resources.nca_app_configuration import (
     NCAAppConfiguration,
 )
 
 
-class NCALogin:
-    """NCA Login"""
+class NCAAuthenticator:
+    """NCA Authenticator"""
 
     def __init__(
         self,
         *,
         cognito_client_id: Optional[str] = None,
         cognito_region: Optional[str] = None,
-        aplos_saas_domain: Optional[str] = None,
+        host: Optional[str] = None,
     ) -> None:
         """
         NCA SaaS Login
@@ -27,18 +27,16 @@ class NCALogin:
         Args:
             cognito_client_id (Optional[str], optional): Cognito Client Id. Defaults to None.
             cognito_region (Optional[str], optional): Cognito Region. Defaults to None.
-            aplos_saas_domain (Optional[str], optional): Aplos NCA SaaS domain. Defaults to None.
+            host (Optional[str], optional): Aplos NCA SaaS host. Defaults to None.
 
         Requirements:
             Either pass in the cognito_client_id and cognito_region.
-            or set the aplos_saas_domain to automatically get the client_id and region.
+            or set the host to automatically get the client_id and region.
         """
-        self.jwt: str
-        self.access_token: Optional[str] = None
-        self.refresh_token: Optional[str] = None
+
         self.__cognito_client_id = cognito_client_id
         self.__region = cognito_region
-        self.__domain: Optional[str] = aplos_saas_domain
+        self.__host: Optional[str] = host
         self.__cognito: Optional[CognitoAuthentication] = None
         self.__config: Optional[NCAAppConfiguration] = None
 
@@ -53,19 +51,19 @@ class NCALogin:
             self.__cognito = CognitoAuthentication(
                 client_id=self.__cognito_client_id,
                 region=self.__region,
-                aplos_domain=self.__domain,
+                aplos_domain=self.__host,
             )
 
         return self.__cognito
 
     @property
-    def domain(self) -> str | None:
+    def host(self) -> str | None:
         """
         Domain
         Returns:
-            str: the domain
+            str: the host
         """
-        return self.__domain
+        return self.__host
 
     @property
     def config(self) -> NCAAppConfiguration:
@@ -75,13 +73,13 @@ class NCALogin:
             NCAAppConfiguration: object to handle the NCA App Configuration
         """
         if self.__config is None:
-            if self.__domain is None:
+            if self.__host is None:
                 raise RuntimeError(
                     "Failed to get Aplos Configuration.  The Domain is not set."
                 )
 
             self.__config = NCAAppConfiguration(
-                aplos_saas_domain=self.__domain,
+                host=self.__host,
             )
 
         return self.__config
@@ -96,9 +94,14 @@ class NCALogin:
         Args:
             username (str): the username
             password (str): the users password
-
+        Returns:
+            str: JWT (JSON Web Token)
         """
+        if not username:
+            raise ValueError("Missing username.  Please provide a valid username.")
+        if not password:
+            raise ValueError("Missing password.  Please provide a valid password.")
 
-        self.jwt = self.cognito.login(username=username, password=password)
+        self.cognito.login(username=username, password=password)
 
-        return self.jwt
+        return self.cognito.jwt

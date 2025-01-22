@@ -5,37 +5,24 @@ Property of Aplos Analytics, Utah, USA
 """
 
 from typing import Any, Dict
-from aplos_nca_saas_sdk.aws_resources.aws_s3_presigned_upload import S3PresignedUpload
-from aplos_nca_saas_sdk.nca_resources.nca_login import NCALogin
-from aplos_nca_saas_sdk.utilities.http_utility import HttpUtilities
+from aplos_nca_saas_sdk.nca_resources._api_base import NCAApiBaseClass
+from aplos_nca_saas_sdk.nca_resources.aws_s3_presigned_upload import (
+    S3PresignedUrlUpload,
+)
 
 
-class NCAFileUpload:
+class NCAFileUpload(NCAApiBaseClass):
     """NCA File Upload"""
 
-    def __init__(self, nca_login: NCALogin) -> None:
-        if nca_login is None or nca_login.jwt is None or not nca_login.jwt:
-            raise ValueError("Authenticated nca_login is required.")
+    def __init__(self, host: str) -> None:
+        super().__init__(host)
 
-        self.__api_domain: str = nca_login.domain or ""
-        self.__tenant_id: str = nca_login.cognito.tenant_id
-        self.__user_id: str = nca_login.cognito.user_id
-        self.__jwt: str = nca_login.jwt
-
-    @property
-    def api_root(self) -> str:
-        """Gets the base url"""
-
-        if self.__api_domain is None:
-            raise RuntimeError("Missing Aplos Api Domain")
-
-        url = HttpUtilities.build_url(
-            self.__api_domain, self.__tenant_id, self.__user_id
-        )
-
-        return url
-
-    def upload(self, input_file_path: str) -> Dict[str, Any]:
+    def upload(
+        self,
+        input_file_path: str,
+        user_name: str | None = None,
+        password: str | None = None,
+    ) -> Dict[str, Any]:
         """
         Uploads a file to the Aplos NCA Cloud
 
@@ -51,7 +38,18 @@ class NCAFileUpload:
         if input_file_path is None or not input_file_path:
             raise ValueError("Valid input_file_path is required.")
 
-        uploader: S3PresignedUpload = S3PresignedUpload(self.__jwt, str(self.api_root))
-        upload_response: Dict[str, Any] = uploader.upload_file(input_file_path)
+        if not self.authenticator.cognito.jwt:
+            if not user_name or not password:
+                raise ValueError(
+                    "Valid user_name and password are required or you can set the authenticator object."
+                )
+            self.authenticator.authenticate(username=user_name, password=password)
+
+        uploader: S3PresignedUrlUpload = S3PresignedUrlUpload(self.host)
+        uploader.authenticator = self.authenticator
+
+        upload_response: Dict[str, Any] = uploader.upload_file(
+            input_file=input_file_path
+        )
 
         return upload_response

@@ -4,7 +4,7 @@ All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
 Property of Aplos Analytics, Utah, USA
 """
 
-from aplos_nca_saas_sdk.nca_resources.nca_login import NCALogin
+from aplos_nca_saas_sdk.nca_resources.nca_authenticator import NCAAuthenticator
 
 
 from aplos_nca_saas_sdk.integration_testing.integration_test_base import (
@@ -35,7 +35,7 @@ class TestAppLogin(IntegrationTestBase):
                 self.results.append(test_response)
                 continue
             try:
-                nca_login = NCALogin(aplos_saas_domain=login.domain)
+                nca_login = NCAAuthenticator(host=login.host)
                 token = nca_login.authenticate(
                     username=login.username, password=login.password
                 )

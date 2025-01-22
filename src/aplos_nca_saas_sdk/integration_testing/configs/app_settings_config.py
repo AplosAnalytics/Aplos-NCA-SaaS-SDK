@@ -8,26 +8,26 @@ from typing import List, Dict, Any
 from aplos_nca_saas_sdk.integration_testing.configs._config_base import ConfigBase
 
 
-class ApplicationDomainConfig(ConfigBase):
+class ApplicationHostConfig(ConfigBase):
     """
-    Application Domain: Defines the domains that the application configuration tests will check against
+    Application host: Defines the domains that the application configuration tests will check against
 
     """
 
-    def __init__(self, domain: str | None = None):
+    def __init__(self, host: str | None = None):
         super().__init__()
-        self.__domain: str | None = domain
+        self.__host: str | None = host
 
     @property
-    def domain(self) -> str:
-        """The domain to validate"""
-        if self.__domain is None:
-            raise RuntimeError("Domain is not set")
-        return self.__domain
+    def host(self) -> str:
+        """The host to validate"""
+        if self.__host is None:
+            raise RuntimeError("host is not set")
+        return self.__host
 
-    @domain.setter
-    def domain(self, value: str):
-        self.__domain = value
+    @host.setter
+    def host(self, value: str):
+        self.__host = value
 
 
 class ApplicationDomainConfigs(ConfigBase):
@@ -38,19 +38,19 @@ class ApplicationDomainConfigs(ConfigBase):
 
     def __init__(self):
         super().__init__()
-        self.__domains: List[ApplicationDomainConfig] = []
+        self.__hosts: List[ApplicationHostConfig] = []
 
     @property
-    def list(self) -> List[ApplicationDomainConfig]:
+    def list(self) -> List[ApplicationHostConfig]:
         """List the logins"""
-        return self.__domains
+        return self.__hosts
 
-    def add(self, *, domain: str, enabled: bool = True):
+    def add(self, *, host: str, enabled: bool = True):
         """Add a loging"""
-        app_domain = ApplicationDomainConfig()
-        app_domain.domain = domain
+        app_domain = ApplicationHostConfig()
+        app_domain.host = host
         app_domain.enabled = enabled
-        self.__domains.append(app_domain)
+        self.__hosts.append(app_domain)
 
     def load(self, test_config: Dict[str, Any]):
         """Load the logins from a list of dictionaries"""
@@ -58,13 +58,13 @@ class ApplicationDomainConfigs(ConfigBase):
         super().load(test_config)
         domains: List[Dict[str, Any]] = test_config.get("domains", [])
 
-        domain: Dict[str, Any]
-        for domain in domains:
-            app_domain = ApplicationDomainConfig()
-            app_domain.domain = domain.get("domain", None)
-            app_domain.enabled = bool(domain.get("enabled", True))
+        host: Dict[str, Any]
+        for host in domains:
+            app_domain = ApplicationHostConfig()
+            app_domain.host = host.get("host", None)
+            app_domain.enabled = bool(host.get("enabled", True))
 
-            self.__domains.append(app_domain)
+            self.__hosts.append(app_domain)
 
 
 class ApplicationSettings(ConfigBase):
@@ -75,12 +75,12 @@ class ApplicationSettings(ConfigBase):
 
     def __init__(self):
         super().__init__()
-        self.__domains: ApplicationDomainConfigs = ApplicationDomainConfigs()
+        self.__hosts: ApplicationDomainConfigs = ApplicationDomainConfigs()
 
     @property
     def domains(self) -> ApplicationDomainConfigs:
-        """List of the domain"""
-        return self.__domains
+        """List of the host"""
+        return self.__hosts
 
     def load(self, test_config: Dict[str, Any]):
         """Load the domains from the config"""

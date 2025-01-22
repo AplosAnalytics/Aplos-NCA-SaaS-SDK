@@ -30,8 +30,8 @@ class NCAAppConfiguration:
 
     """
 
-    def __init__(self, aplos_saas_domain: str):
-        self.endpoints: NCAEndpoints = NCAEndpoints(aplos_saas_domain=aplos_saas_domain)
+    def __init__(self, host: str):
+        self.__endpoints: NCAEndpoints = NCAEndpoints(host=host)
         self.__response: requests.Response | None = None
 
     def get(self) -> requests.Response:
@@ -40,7 +40,7 @@ class NCAAppConfiguration:
         if self.__response is not None:
             return self.__response
 
-        url = self.endpoints.app_configuration()
+        url = self.__endpoints.app_configuration
         self.__response = requests.get(url, timeout=30)
         if self.__response.status_code != 200:
             raise RuntimeError("App configuration url is not working.")

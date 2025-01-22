@@ -9,20 +9,23 @@ import os
 from typing import Any, Dict
 
 import requests
-from aplos_nca_saas_sdk.aws_resources.aws_s3_presigned_payload import (
-    S3PresignedPayload,
+from aplos_nca_saas_sdk.nca_resources.aws_s3_presigned_payload import (
+    S3PresignedUrlPayload,
 )
-from aplos_nca_saas_sdk.utilities.http_utility import HttpUtilities, Routes
+from aplos_nca_saas_sdk.utilities.http_utility import HttpUtilities
+from aplos_nca_saas_sdk.nca_resources._api_base import NCAApiBaseClass
 
 
-class S3PresignedUpload:
-    """S3PresignedUpload"""
+class S3PresignedUrlUpload(NCAApiBaseClass):
+    """S3PresignedUrlUpload"""
 
-    def __init__(self, jwt: str, api_url: str) -> None:
-        self.api_url = api_url
-        self.jwt = jwt
+    def __init__(self, host: str) -> None:
+        super().__init__(host)
 
-    def upload_file(self, input_file: str) -> Dict[str, Any]:
+    def upload_file(
+        self,
+        input_file: str,
+    ) -> Dict[str, Any]:
         """
         Uploads a file to your Aplos Cloud Account in AWS
 
@@ -34,15 +37,17 @@ class S3PresignedUpload:
         """
 
         # get the presigned url for uploading
-        paylod: S3PresignedPayload = self.__get_presigned_upload_info(
-            input_file=input_file
+        paylod: S3PresignedUrlPayload = self.__get_presigned_upload_info(
+            input_file=input_file, jwt=self.authenticator.cognito.jwt
         )
         # upload the files
         upload_response = self.__upload_file_to_s3(paylod, input_file=input_file)
 
         return upload_response
 
-    def __get_presigned_upload_info(self, input_file: str) -> S3PresignedPayload:
+    def __get_presigned_upload_info(
+        self, input_file: str, jwt: str
+    ) -> S3PresignedUrlPayload:
         """
         Performs all the necessary steps for creating a presigned url to upload a file to S3.
         We're using AWS S3 presigned urls for security as well as allowing for very large files if required.
@@ -50,11 +55,11 @@ class S3PresignedUpload:
             input_file (str): the path to the input (analysis) file
 
         Returns:
-            S3PresignedPayload: instance of S3PresignedPayload
+            S3PresignedUrlPayload: instance of S3PresignedUrlPayload
         """
 
-        url = f"{self.api_url}/{Routes.NCA_GENERATE_UPLOAD}"
-        headers = HttpUtilities.get_headers(self.jwt)
+        url = self.endpoints.files
+        headers = HttpUtilities.get_headers(jwt)
 
         body = {"file_name": input_file, "method_type": "post"}
         response = requests.post(
@@ -76,17 +81,17 @@ class S3PresignedUpload:
             )
         result = response.json()
 
-        payload: S3PresignedPayload = S3PresignedPayload(result)
+        payload: S3PresignedUrlPayload = S3PresignedUrlPayload(result)
 
         return payload
 
     def __upload_file_to_s3(
-        self, payload: S3PresignedPayload, input_file: str
+        self, payload: S3PresignedUrlPayload, input_file: str
     ) -> Dict[str, Any]:
         """
         Peforms the actual uploading via a presigned url for S3 bucket storage
         Args:
-            payload (S3PresignedPayload): instance of S3PresignedPayload with all the data needed
+            payload (S3PresignedUrlPayload): instance of S3PresignedUrlPayload with all the data needed
             input_file (str): the path to a file being uploaded
 
         Raises:
@@ -104,8 +109,9 @@ class S3PresignedUpload:
         with open(input_file, "rb") as file:
             files = {"file": (input_file, file)}
             # upload to s3 with the presigned url
+            # authentication is built into the url
             upload_response = requests.post(
-                str(payload.url), data=payload.form_data, files=files, timeout=30
+                str(payload.url), data=payload.form_data, files=files, timeout=60
             )
 
         # Check the response: 204 is a success in this case

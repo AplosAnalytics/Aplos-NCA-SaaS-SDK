@@ -18,13 +18,13 @@ class LoginConfig(ConfigBase):
         self,
         username: Optional[str] = None,
         passord: Optional[str] = None,
-        domain: Optional[str] = None,
+        host: Optional[str] = None,
         roles: Optional[List[str]] = None,
     ):
         super().__init__()
         self.__username: Optional[str] = username
         self.__password: Optional[str] = passord
-        self.__domain: Optional[str] = domain
+        self.__host: Optional[str] = host
         self.__roles: List[str] = roles if roles is not None else []
 
     @property
@@ -48,14 +48,15 @@ class LoginConfig(ConfigBase):
         self.__password = value
 
     @property
-    def domain(self) -> str:
-        if self.__domain is None:
-            raise RuntimeError("Domain is not set")
-        return self.__domain
+    def host(self) -> str:
+        """API Host"""
+        if self.__host is None:
+            raise RuntimeError("Host is not set")
+        return self.__host
 
-    @domain.setter
-    def domain(self, value: str):
-        self.__domain = value
+    @host.setter
+    def host(self, value: str):
+        self.__host = value
 
     @property
     def roles(self) -> List[str]:
@@ -84,12 +85,12 @@ class LoginConfigs(ConfigBase):
         """List the logins"""
         return self.__logins
 
-    def add(self, *, username: str, password: str, domain: str, enabled: bool = True):
+    def add(self, *, username: str, password: str, host: str, enabled: bool = True):
         """Add a loging"""
         login = LoginConfig()
         login.username = username
         login.password = password
-        login.domain = domain
+        login.host = host
         login.enabled = enabled
         self.__logins.append(login)
 
@@ -111,8 +112,8 @@ class LoginConfigs(ConfigBase):
         if login_config is not None:
             username = login_config.get("username", None)
             password = login_config.get("password", None)
-            domain = login_config.get("domain", None)
+            host = login_config.get("host", None)
             enabled = login_config.get("enabled", True)
-            login = LoginConfig(username, password, domain)
+            login = LoginConfig(username, password, host)
             login.enabled = enabled
         return login

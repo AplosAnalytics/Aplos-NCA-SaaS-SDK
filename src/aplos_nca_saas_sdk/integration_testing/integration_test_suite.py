@@ -93,6 +93,8 @@ class IntegrationTestSuite:
         return len(failures) == 0
 
     def __print_results(self, start_time: datetime, failures: List[Dict[str, Any]]):
+        print("")
+        print("--------------------------------")
         print("Test Results:")
         skipped = sum([test["skipped_count"] for test in self.test_results])
 
@@ -101,8 +103,6 @@ class IntegrationTestSuite:
             print(
                 f"  {test_result['test_name']} {'succeeded' if test_result['success'] else 'failed'} duration: {duration}"
             )
-            if not test_result["success"]:
-                print(f"    Errors: {test_result['errors']}")
 
         print(f"Test Suite completed in {datetime.now(UTC) - start_time}")
 
@@ -110,3 +110,10 @@ class IntegrationTestSuite:
         print(f"  Successful: {len(self.test_results) - len(failures) - skipped}")
         print(f"  Skipped: {skipped}")
         print(f"  Failed: {len(failures)}")
+
+        if len(failures) > 0:
+            print("--------------------------------")
+
+        for test_result in self.test_results:
+            if not test_result["success"]:
+                print(f"Errors: {test_result['errors']}")

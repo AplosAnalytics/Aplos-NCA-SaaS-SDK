@@ -11,61 +11,27 @@ import zipfile
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict
-from aws_lambda_powertools import Logger
-import requests
 
-from aplos_nca_saas_sdk.aws_resources.aws_cognito import CognitoAuthentication
-from aplos_nca_saas_sdk.aws_resources.aws_s3_presigned_upload import (
-    S3PresignedUpload,
+import requests
+from aws_lambda_powertools import Logger
+
+from aplos_nca_saas_sdk.nca_resources._api_base import NCAApiBaseClass
+from aplos_nca_saas_sdk.nca_resources.aws_s3_presigned_upload import (
+    S3PresignedUrlUpload,
 )
-from aplos_nca_saas_sdk.utilities.commandline_args import CommandlineArgs
-from aplos_nca_saas_sdk.utilities.http_utility import HttpUtilities, Routes
 from aplos_nca_saas_sdk.utilities.environment_vars import EnvironmentVars
+from aplos_nca_saas_sdk.utilities.http_utility import HttpUtilities
 
 logger = Logger()
 
 
-class NCAAnalysis:
-    """NCA Analysis API Access"""
+class NCAAnalysis(NCAApiBaseClass):
+    """NCA Analysis API"""
 
-    def __init__(self, api_domain: str) -> None:
-        self.__jwt: str
+    def __init__(self, host: str) -> None:
+        super().__init__(host)
 
-        if not api_domain:
-            raise ValueError("Missing Aplos Api Domain")
-
-        self.__api_domain: str = api_domain
         self.verbose: bool = False
-        self.__cognito: CognitoAuthentication | None = None
-
-    @property
-    def cognito(self) -> CognitoAuthentication:
-        """Gets the cognito authentication object"""
-
-        if not self.__api_domain:
-            raise RuntimeError(
-                "Missing Aplos Api Domain. Set the internal property of __api_domain first."
-                "This is required to make an authentication connection"
-            )
-
-        if self.__cognito is None:
-            self.__cognito = CognitoAuthentication(
-                client_id=None, region=None, aplos_domain=self.__api_domain
-            )
-
-        return self.__cognito
-
-    @property
-    def api_root(self) -> str:
-        """Gets the base url"""
-        if self.__api_domain is None:
-            raise RuntimeError("Missing Aplos Api Domain")
-
-        url = HttpUtilities.build_url(
-            self.__api_domain, self.cognito.tenant_id, self.cognito.user_id
-        )
-
-        return url
 
     def execute(
         self,
@@ -100,17 +66,13 @@ class NCAAnalysis:
             Dict[str, Any]: The execution response.  If you wait for the completion
         """
 
-        self.log(f"\tLogging into {self.__api_domain}.")
+        self.log(f"\tLogging into {self.host}.")
 
-        if not username:
-            raise ValueError("Missing username.  Please provide a valid username.")
-        if not password:
-            raise ValueError("Missing password.  Please provide a valid password.")
-
-        self.__jwt = self.cognito.login(username=username, password=password)
+        self.authenticator.authenticate(username=username, password=password)
 
         self.log("\tUploading the analysis file.")
-        uploader: S3PresignedUpload = S3PresignedUpload(self.__jwt, str(self.api_root))
+        uploader: S3PresignedUrlUpload = S3PresignedUrlUpload(str(self.host))
+        uploader.authenticator = self.authenticator
         upload_response: Dict[str, Any] = uploader.upload_file(input_file_path)
 
         file_id: str = upload_response.get("file_id", "")
@@ -188,7 +150,7 @@ class NCAAnalysis:
             raise ValueError(
                 "Missing config_data.  Please provide a valid config_data."
             )
-        headers = HttpUtilities.get_headers(self.__jwt)
+        headers = HttpUtilities.get_headers(self.authenticator.cognito.jwt)
         # to start a new execution we need the location of the file (s3 bucket and object key)
         # you basic configuration
         # optional meta data
@@ -198,9 +160,12 @@ class NCAAnalysis:
             "configuration": config_data,
             "meta_data": meta_data,
         }
-        url = f"{str(self.api_root)}/{Routes.NCA_EXECUTIONS}"
+
         response: requests.Response = requests.post(
-            url, headers=headers, data=json.dumps(submission), timeout=30
+            self.endpoints.executions,
+            headers=headers,
+            data=json.dumps(submission),
+            timeout=30,
         )
         json_response: dict = response.json()
 
@@ -234,9 +199,9 @@ class NCAAnalysis:
             str | None: on success: a url for download, on failure: None
         """
 
-        url = f"{self.api_root}/{Routes.NCA_EXECUTIONS}/{execution_id}"
+        url = f"{self.endpoints.execution(execution_id)}"
 
-        headers = HttpUtilities.get_headers(self.__jwt)
+        headers = HttpUtilities.get_headers(self.authenticator.cognito.jwt)
         current_time = datetime.now()
         # Create a timedelta object representing 15 minutes
         time_delta = timedelta(seconds=max_wait_in_seconds)

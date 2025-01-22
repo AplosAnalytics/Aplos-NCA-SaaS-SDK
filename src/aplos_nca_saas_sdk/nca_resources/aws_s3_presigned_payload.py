@@ -5,8 +5,8 @@ Property of Aplos Analytics, Utah, USA
 """
 
 
-class S3PresignedPayload:
-    """S3PresignedPayload"""
+class S3PresignedUrlPayload:
+    """S3 Presigned Url Payload"""
 
     def __init__(self, payload: dict | None = None) -> None:
         self.url: str | None = None

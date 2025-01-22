@@ -35,7 +35,7 @@ def main():
             print("Missing some arguments.")
             exit()
 
-        analysis_api = NCAAnalysis(api_domain=str(args.api_domain))
+        analysis_api = NCAAnalysis(host=str(args.host))
         analysis_api.verbose = True
 
         print("\tLoading analysis configurations")

@@ -46,10 +46,10 @@ class CommandlineArgs:
         )
 
         self.parser.add_argument(
-            "-a",
-            "--api-domain",
+            "-d",
+            "--host",
             required=False,
-            help="The api domain. Eg. api.aplos-nca.com",
+            help="The api host/host. Eg. api.aplos-nca.com, api.tenant.aplos-nca.com",
         )
 
         self.parser.add_argument(
@@ -80,7 +80,7 @@ class CommandlineArgs:
         # auth information
         self.username: str | None = None
         self.password: str | None = None
-        self.api_domain: str | None = None
+        self.host: str | None = None
 
         # excuction setup
         self.config_file: str | None = None
@@ -110,7 +110,7 @@ class CommandlineArgs:
         self.config_file = args.config_file
         # anything with a dash (in the args) is accessed with an underscore
         self.analysis_file = args.analyis_file
-        self.api_domain = args.api_domain
+        self.host = args.host
 
         self.metadata_file = args.metadata_file
         self.skip = args.skip
@@ -136,11 +136,11 @@ class CommandlineArgs:
                     "password", env.password, is_sensitive=True
                 )
 
-        if not self.api_domain:
-            if self.skip and env.api_domain:
-                self.api_domain = env.api_domain
+        if not self.host:
+            if self.skip and env.host:
+                self.host = env.host
             else:
-                self.api_domain = self.prompt_for_input("Api Domain", env.api_domain)
+                self.host = self.prompt_for_input("Api Domain", env.host)
 
         if not self.analysis_file:
             if self.skip and self.analysis_file_default or env.analysis_file:
@@ -193,7 +193,7 @@ class CommandlineArgs:
             self.password,
             self.analysis_file,
             self.config_file,
-            self.api_domain,
+            self.host,
         ]
         for field in required_fields:
             if not field:
@@ -308,7 +308,7 @@ def main():
         print(f"username = {args.username}")
         print(f"password = {pwd}")
 
-        print(f"api_domain = {args.api_domain}")
+        print(f"host = {args.host}")
         print(f"analysis_file = {args.analysis_file}")
 
         print(f"config_file = {args.config_file}")

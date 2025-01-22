@@ -79,7 +79,7 @@ class CognitoAuthentication:
           - or the Aplos Domain (which can get the clientId and region)
         """
         if self.__client_id is None and self.__aplos_domain is not None:
-            self.__config = NCAAppConfiguration(aplos_saas_domain=self.__aplos_domain)
+            self.__config = NCAAppConfiguration(host=self.__aplos_domain)
             self.__client_id = self.__config.cognito_client_id
             self.__region = self.__config.cognito_region
 

@@ -12,7 +12,7 @@ class EnvironmentVars:
 
     def __init__(self) -> None:
         # load defaults
-        self.api_domain = os.getenv("APLOS_API_DOMAIN", "")
+        self.host = os.getenv("APLOS_host", "")
 
         self.aws_region = os.getenv("COGNITO_REGION")
         self.client_id = os.getenv("COGNITO_CLIENT_ID")
@@ -23,10 +23,10 @@ class EnvironmentVars:
         self.metadata_file = os.getenv("METADATA_FILE")
         self.analysis_file = os.getenv("ANALYSIS_FILE")
 
-        if self.api_domain is not None and "https://" in self.api_domain:
-            self.api_domain = self.api_domain.replace("https://", "")
+        if self.host is not None and "https://" in self.host:
+            self.host = self.host.replace("https://", "")
 
-        self.aplos_api_url = f"https://{self.api_domain}"
+        self.aplos_api_url = f"https://{self.host}"
 
     @staticmethod
     def is_running_in_aws_lambda():
