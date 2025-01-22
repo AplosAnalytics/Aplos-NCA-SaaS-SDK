@@ -78,7 +78,7 @@ class NCAAnalysisTest(IntegrationTestBase):
                     raise RuntimeError(
                         "Expected populated output_file from NCAExecution was None."
                     )
-                elif not Path(expected_output_file).is_file:
+                elif not Path(expected_output_file).is_file():
                     raise RuntimeError("Expected downloaded file does not exist.")
 
             except Exception as e:  # pylint: disable=w0718

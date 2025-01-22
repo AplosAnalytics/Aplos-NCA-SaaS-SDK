@@ -17,7 +17,7 @@ class NCAFileUpload:
         if nca_login is None or nca_login.jwt is None or not nca_login.jwt:
             raise ValueError("Authenticated nca_login is required.")
 
-        self.__api_domain: str = nca_login.domain
+        self.__api_domain: str = nca_login.domain or ""
         self.__tenant_id: str = nca_login.cognito.tenant_id
         self.__user_id: str = nca_login.cognito.user_id
         self.__jwt: str = nca_login.jwt

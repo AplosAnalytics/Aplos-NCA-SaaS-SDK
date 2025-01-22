@@ -49,7 +49,7 @@ class NCAAnalysis:
             )
 
         if self.__cognito is None:
-            self.__cognito: CognitoAuthentication = CognitoAuthentication(
+            self.__cognito = CognitoAuthentication(
                 client_id=None, region=None, aplos_domain=self.__api_domain
             )
 

@@ -14,16 +14,20 @@ class FileUtility:
     """General File Utilities"""
 
     @staticmethod
-    def load_filepath(filepath: str) -> str:
-        """Load the filepath"""
-        if not filepath:
-            raise RuntimeError("Filepath is required")
-        elif filepath.startswith("${module}"):
+    def load_filepath(file_path: str) -> str:
+        """Load the file_path"""
+        if not file_path:
+            raise RuntimeError("file_path is required")
+        elif file_path.startswith("${module}"):
             # find the path
             es: EnvironmentServices = EnvironmentServices()
             root = es.find_module_path()
-            filepath = filepath.replace("${module}", root)
+            if not root:
+                raise RuntimeError(
+                    "Unable to find the module path.  Please use the ${module} syntax to define the file path"
+                )
+            file_path = file_path.replace("${module}", root)
 
         # get the correct os path separator
-        filepath = os.path.normpath(filepath)
-        return filepath
+        file_path = os.path.normpath(file_path)
+        return file_path
