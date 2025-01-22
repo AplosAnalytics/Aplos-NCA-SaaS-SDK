@@ -1,5 +1,5 @@
 """
-Copyright 2024 Aplos Analytics
+Copyright 2024-2025 Aplos Analytics
 All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
 Property of Aplos Analytics, Utah, USA
 """
@@ -340,6 +340,7 @@ class NCAAnalysis:
 
 
 def main():
+    """Run Main when then file is run directly"""
     try:
         print("Welcome to the NCA Engine Upload & Execution Demo")
         args = CommandlineArgs()

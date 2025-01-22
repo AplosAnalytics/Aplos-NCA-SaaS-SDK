@@ -1,5 +1,5 @@
 """
-Copyright 2024 Aplos Analytics
+Copyright 2024-2025 Aplos Analytics
 All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
 Property of Aplos Analytics, Utah, USA
 """
@@ -64,14 +64,14 @@ class S3PresignedUpload:
         if response.status_code == 403:
             raise PermissionError(
                 "Failed to get a presigned url. "
-                f"Status Code: {response.status_code }"
+                f"Status Code: {response.status_code}"
                 f"Reason: {response.reason} "
                 f"403 Errors can also occur if you have an invalid path."
             )
         elif response.status_code != 200:
             raise RuntimeError(
                 "Failed to get a presigned url. "
-                f"Status Code: {response.status_code }"
+                f"Status Code: {response.status_code}"
                 f"Reason: {response.reason}"
             )
         result = response.json()

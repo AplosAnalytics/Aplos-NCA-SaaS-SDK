@@ -1,10 +1,18 @@
-import os
+"""
+Copyright 2024-2025 Aplos Analytics
+All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
+Property of Aplos Analytics, Utah, USA
+"""
+
 import argparse
 import getpass
+import os
 from pathlib import Path
 from typing import List
-from aplos_nca_saas_sdk.utilities.environment_vars import EnvironmentVars
+
 from dotenv import load_dotenv
+
+from aplos_nca_saas_sdk.utilities.environment_vars import EnvironmentVars
 
 # load the environment (.env) file if any
 # this may or may not be the desired results

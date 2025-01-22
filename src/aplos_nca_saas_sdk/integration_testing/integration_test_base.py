@@ -1,11 +1,11 @@
 """
-Copyright 2024 Aplos Analytics
+Copyright 2024-2025 Aplos Analytics
 All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
 Property of Aplos Analytics, Utah, USA
 """
 
-from typing import Dict, Any, List
 from abc import ABC, abstractmethod
+from typing import List
 
 from aplos_nca_saas_sdk.integration_testing.integration_test_configurations import (
     TestConfiguration,

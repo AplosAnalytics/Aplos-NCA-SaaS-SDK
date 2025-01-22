@@ -1,5 +1,5 @@
 """
-Copyright 2024 Aplos Analytics
+Copyright 2024-2025 Aplos Analytics
 All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
 Property of Aplos Analytics, Utah, USA
 """
@@ -9,9 +9,13 @@ from typing import Any, Dict
 from aplos_nca_saas_sdk.integration_testing.configs.app_settings_config import (
     ApplicationSettings,
 )
-from aplos_nca_saas_sdk.integration_testing.configs.file_upload_config import FileUploadConfigs
+from aplos_nca_saas_sdk.integration_testing.configs.file_upload_config import (
+    FileUploadConfigs,
+)
 from aplos_nca_saas_sdk.integration_testing.configs.login_config import LoginConfigs
-from aplos_nca_saas_sdk.integration_testing.configs.nca_execution_config import NCAExecutionConfigs
+from aplos_nca_saas_sdk.integration_testing.configs.nca_execution_config import (
+    NCAExecutionConfigs,
+)
 
 
 class TestConfiguration:
@@ -25,7 +29,7 @@ class TestConfiguration:
         self.logins: LoginConfigs = LoginConfigs()
         self.file_uploads: FileUploadConfigs = FileUploadConfigs()
         self.nca_executions: NCAExecutionConfigs = NCAExecutionConfigs()
-        
+
     def load(self, file_path: str):
         """
         Loads the configuration from a file
