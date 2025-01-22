@@ -20,6 +20,8 @@ load_dotenv(override=True)
 
 
 class CommandlineArgs:
+    """Wrapper fro commandline args"""
+
     def __init__(self) -> None:
         # command line args
         self.parser = argparse.ArgumentParser(
@@ -43,7 +45,12 @@ class CommandlineArgs:
             "-m", "--metadata-file", required=False, help="Path to the metadata file"
         )
 
-        self.parser.add_argument("-a", "--api-url", required=False, help="The api url")
+        self.parser.add_argument(
+            "-a",
+            "--api-domain",
+            required=False,
+            help="The api domain. Eg. api.aplos-nca.com",
+        )
 
         self.parser.add_argument(
             "-v", "--verbose", required=False, help="Detailed logging information"
@@ -302,13 +309,14 @@ def main():
         print(f"password = {pwd}")
 
         print(f"api_domain = {args.api_domain}")
+        print(f"analysis_file = {args.analysis_file}")
 
         print(f"config_file = {args.config_file}")
         print(f"metadata_file = {args.metadata_file}")
-        print(f"analysis_file = {args.analysis_file}")
+
         print(f"output_directory = {args.output_directory}")
 
-        print("were good to go")
+        print("✅ All required parameters are accounted for.")
 
     else:
         print("Missing some required fields.")

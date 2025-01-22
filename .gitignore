@@ -12,4 +12,6 @@ dist/
 .env
 .env.*
 .config.*
+# exclude any output generated
 .aplos-nca-output
+.output
