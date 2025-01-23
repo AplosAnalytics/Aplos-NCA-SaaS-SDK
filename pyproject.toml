@@ -26,7 +26,7 @@ keywords = [
     "Clinical Trials"
 ]
 
-version = "0.0.14"
+version = "0.0.15"
 authors = [
   { name="Eric Wilson", email="eric.wilson@aplosanalytics.com" }
 ]
