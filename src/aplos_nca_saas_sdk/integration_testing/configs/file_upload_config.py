@@ -71,6 +71,9 @@ class FileUploadConfigs(ConfigBase):
         """Load the file uploads from a list of dictionaries"""
 
         super().load(test_config)
+        if not self.enabled:
+            return
+
         test_config_login: LoginConfig | None = LoginConfigs.try_load_login(
             test_config.get("login", None)
         )

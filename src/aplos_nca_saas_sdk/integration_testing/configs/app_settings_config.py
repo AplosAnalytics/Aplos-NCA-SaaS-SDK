@@ -85,4 +85,6 @@ class ApplicationSettings(ConfigBase):
     def load(self, test_config: Dict[str, Any]):
         """Load the hosts from the config"""
         super().load(test_config)
+        if not self.enabled:
+            return
         self.hosts.load(test_config)

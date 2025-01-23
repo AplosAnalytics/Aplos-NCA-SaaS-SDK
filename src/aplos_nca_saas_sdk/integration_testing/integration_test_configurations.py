@@ -17,6 +17,10 @@ from aplos_nca_saas_sdk.integration_testing.configs.nca_execution_config import 
     NCAExecutionConfigs,
 )
 
+from aplos_nca_saas_sdk.integration_testing.configs.nca_validation_config import (
+    NCAValidationConfigs,
+)
+
 
 class TestConfiguration:
     """
@@ -29,6 +33,7 @@ class TestConfiguration:
         self.logins: LoginConfigs = LoginConfigs()
         self.file_uploads: FileUploadConfigs = FileUploadConfigs()
         self.nca_executions: NCAExecutionConfigs = NCAExecutionConfigs()
+        self.nca_validations: NCAValidationConfigs = NCAValidationConfigs()
 
     def load(self, file_path: str):
         """
@@ -46,3 +51,4 @@ class TestConfiguration:
         self.app_config.load(config.get("application_config_test", {}))
         self.file_uploads.load(config.get("file_upload_test", {}))
         self.nca_executions.load(config.get("analysis_execution_test", {}))
+        self.nca_validations.load(config.get("analysis_validation_test", {}))

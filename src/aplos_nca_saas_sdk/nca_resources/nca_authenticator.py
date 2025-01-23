@@ -9,6 +9,7 @@ from aplos_nca_saas_sdk.nca_resources.aws_cognito import CognitoAuthentication
 from aplos_nca_saas_sdk.nca_resources.nca_app_configuration import (
     NCAAppConfiguration,
 )
+from aplos_nca_saas_sdk.utilities.http_utility import HttpUtilities
 
 
 class NCAAuthenticator:
@@ -105,3 +106,7 @@ class NCAAuthenticator:
         self.cognito.login(username=username, password=password)
 
         return self.cognito.jwt
+
+    def get_jwt_http_headers(self) -> str:
+        """Get the formatted http headers for the JWT"""
+        return HttpUtilities.get_headers(self.cognito.jwt)

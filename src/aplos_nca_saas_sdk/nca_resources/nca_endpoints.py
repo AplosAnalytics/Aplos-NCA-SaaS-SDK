@@ -70,6 +70,10 @@ class NCAEndpoints:
         """Returns the validations endpoint"""
         return f"{self.user_path}/nca/validations"
 
+    def validation(self, batch_id: str) -> str:
+        """Returns the validations endpoint for a specific batch"""
+        return f"{self.validations}/{batch_id}"
+
     @property
     def files(self) -> str:
         """Returns the files endpoint"""

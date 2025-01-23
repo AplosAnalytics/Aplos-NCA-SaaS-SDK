@@ -4,16 +4,18 @@ All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
 Property of Aplos Analytics, Utah, USA
 """
 
-import os
 import json
+import os
 from typing import Any, Dict, List
+
+from aws_lambda_powertools import Logger
+
 from aplos_nca_saas_sdk.integration_testing.configs._config_base import ConfigBase
 from aplos_nca_saas_sdk.integration_testing.configs.login_config import (
     LoginConfig,
     LoginConfigs,
 )
 from aplos_nca_saas_sdk.utilities.file_utility import FileUtility
-from aws_lambda_powertools import Logger
 
 logger = Logger(service="NCAExecutionConfig")
 
@@ -124,6 +126,8 @@ class NCAExecutionConfigs(ConfigBase):
         """Loads the NCA Execution configs from a list of dictionaries"""
 
         super().load(test_config)
+        if not self.enabled:
+            return
 
         base_login: LoginConfig | None = LoginConfigs.try_load_login(
             test_config.get("login", None)

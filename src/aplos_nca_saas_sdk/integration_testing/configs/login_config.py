@@ -98,6 +98,9 @@ class LoginConfigs(ConfigBase):
         """Load the logins from a list of dictionaries"""
 
         super().load(test_config)
+        if not self.enabled:
+            return
+
         logins: List[Dict[str, str]] = test_config.get("logins", [])
         for login in logins:
             login_config = LoginConfigs.try_load_login(login)

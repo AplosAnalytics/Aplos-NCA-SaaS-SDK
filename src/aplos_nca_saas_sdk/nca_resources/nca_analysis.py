@@ -150,7 +150,7 @@ class NCAAnalysis(NCAApiBaseClass):
             raise ValueError(
                 "Missing config_data.  Please provide a valid config_data."
             )
-        headers = HttpUtilities.get_headers(self.authenticator.cognito.jwt)
+        headers = self.authenticator.get_jwt_http_headers()
         # to start a new execution we need the location of the file (s3 bucket and object key)
         # you basic configuration
         # optional meta data
