@@ -16,19 +16,25 @@ from aplos_nca_saas_sdk.integration_testing.integration_test_configurations impo
 
 
 def main():
-    """Run the tests"""
+    """This is an example on how you can run the unit tests"""
 
+    # Optionally use our convient Environment Services loader
+    # which can help during intial testings.
     evs: EnvironmentServices = EnvironmentServices()
+    # see if we have a local .env, .env.uat, etc configured to look up
     env_file = os.getenv("ENV_FILE")
     if env_file:
         # if we have an environment file defined, let's load it
         evs.load_environment(starting_path=__file__, file_name=env_file)
 
+    # this is where the work begins
     its: IntegrationTestSuite = IntegrationTestSuite()
     config: TestConfiguration = TestConfiguration()
 
-    # normally we'd pull a test configuration file from Secrets Manager, Parameter Store, or some other secure location
-    # here we're going to pull the sample file and then override some it's values.
+    # here were going to load a config file that is local, for security purpose
+    # you should store this in SecretsManager, Parameter Store, a secure S3 bucket etc.
+    # the configs typically contain sensitive information like usernames & passwords
+    # so be careful where you store it!
     config_file = os.path.join(
         Path(__file__).parent,
         "configs",
@@ -37,14 +43,16 @@ def main():
     # load it so we can see what it looks like
     config.load(file_path=config_file)
 
-    # override the configuration
-    # override_config(config)
-
+    # run the tests
     its.test(test_config=config)
 
 
 def override_config(config: TestConfiguration):
-    """Override the configuration for the tests"""
+    """
+    Override the configuration for the tests.
+    This is some sample code how you can use a combination of a config file
+    and then override the username/password combos using environment vars.
+    """
     username = os.getenv("TEST_USERNAME")
     password = os.getenv("TEST_PASSWORD")
     host = os.getenv("TEST_HOST")
