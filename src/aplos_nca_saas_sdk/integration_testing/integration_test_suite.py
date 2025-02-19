@@ -70,15 +70,15 @@ class IntegrationTestSuite:
                 if self.fail_fast:
                     # just break and let the failure routine handle it
                     break
+            finally:
+                test_result["end_time_utc"] = datetime.now(UTC)
+                self.test_results.append(test_result)
 
-            test_result["end_time_utc"] = datetime.now(UTC)
-            self.test_results.append(test_result)
-
-            if test_result["success"]:
-                logger.info(f"Test {test.name} succeeded")
-                logger.debug(test_result)
-            else:
-                logger.error(test_result)
+                if test_result["success"]:
+                    logger.info(f"Test {test.name} succeeded")
+                    logger.debug(test_result)
+                else:
+                    logger.error(test_result)
         # find the failures
         failures = [test for test in self.test_results if len(test["errors"]) > 0]
         self.__print_results(start_time, failures)
