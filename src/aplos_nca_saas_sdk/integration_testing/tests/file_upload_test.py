@@ -5,11 +5,13 @@ Property of Aplos Analytics, Utah, USA
 """
 
 import time
-from datetime import datetime, timedelta
-from typing import Any, Dict, List
+from typing import Any, Dict
 
-import requests
 from aws_lambda_powertools import Logger
+
+from aplos_nca_saas_sdk.integration_testing.configs.file_upload_config import (
+    FileUploadConfig,
+)
 from aplos_nca_saas_sdk.integration_testing.configs.login_config import LoginConfig
 from aplos_nca_saas_sdk.integration_testing.integration_test_base import (
     IntegrationTestBase,
@@ -17,13 +19,9 @@ from aplos_nca_saas_sdk.integration_testing.integration_test_base import (
 from aplos_nca_saas_sdk.integration_testing.integration_test_response import (
     IntegrationTestResponse,
 )
-from aplos_nca_saas_sdk.nca_resources.nca_file_upload import NCAFileUpload
-from aplos_nca_saas_sdk.nca_resources.nca_file_download import NCAFileDownload
 from aplos_nca_saas_sdk.nca_resources.nca_authenticator import NCAAuthenticator
-from aplos_nca_saas_sdk.utilities.http_utility import HttpUtilities
-from aplos_nca_saas_sdk.integration_testing.configs.file_upload_config import (
-    FileUploadConfig,
-)
+from aplos_nca_saas_sdk.nca_resources.nca_file_download import NCAFileDownload
+from aplos_nca_saas_sdk.nca_resources.nca_file_upload import NCAFileUpload
 
 logger = Logger()
 
@@ -46,9 +44,7 @@ class FileUploadTest(IntegrationTestBase):
             try:
                 # Confirm Login
                 nca_login = self.__login(file_upload.login)
-                # if not nca_login.cognito.jwt:
-                #     test_response.error = "Failed to authenticate"
-                # else:
+
                 # Confirm Upload
                 upload_response: Dict[str, Any] = self.__upload(
                     nca_login, file_upload.file_path
