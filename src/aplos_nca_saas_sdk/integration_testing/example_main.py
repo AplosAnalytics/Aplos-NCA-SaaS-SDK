@@ -18,8 +18,8 @@ from aplos_nca_saas_sdk.integration_testing.integration_test_configurations impo
 def main():
     """This is an example on how you can run the unit tests"""
 
-    # Optionally use our convient Environment Services loader
-    # which can help during intial testings.
+    # Optionally use our convenient Environment Services loader
+    # which can help during initial testings.
     evs: EnvironmentServices = EnvironmentServices()
     # see if we have a local .env, .env.uat, etc configured to look up
     env_file = os.getenv("ENV_FILE")

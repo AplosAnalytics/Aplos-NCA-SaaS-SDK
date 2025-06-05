@@ -63,23 +63,30 @@ class NCAAnalysisTest(IntegrationTestBase):
                     ),
                     config_data=nca_execution_config.config_data,
                     meta_data=nca_execution_config.meta_data,
-                    wait_for_results=True,
+                    wait_for_results=nca_execution_config.wait_for_results,
+                    max_wait_in_seconds=nca_execution_config.max_wait_in_seconds,
                     output_directory=nca_execution_config.output_dir,
                     unzip_after_download=False,
+                    data_processing=nca_execution_config.data_processing,
+                    post_processing=nca_execution_config.post_processing,
+                    full_payload=nca_execution_config.full_payload,
                 )
 
                 # Verify Download
                 logger.info(
                     {"message": "Execution complete. Verifying results download."}
                 )
-
-                expected_output_file = execution_response.get("results", {}).get("file")
-                if expected_output_file is None:
-                    raise RuntimeError(
-                        "Expected populated output_file from NCAExecution was None."
-                    )
-                elif not Path(expected_output_file).is_file():
-                    raise RuntimeError("Expected downloaded file does not exist.")
+                status_code = execution_response.get("results", {}).get("status_code")
+                if status_code == 201:
+                    pass  # No output file expected
+                else:
+                    expected_output_file = execution_response.get("results", {}).get("file")
+                    if expected_output_file is None:
+                        raise RuntimeError(
+                            "Expected populated output_file from NCAExecution was None."
+                        )
+                    elif not Path(expected_output_file).is_file():
+                        raise RuntimeError("Expected downloaded file does not exist.")
 
             except Exception as e:  # pylint: disable=w0718
                 test_response.error = str(e)

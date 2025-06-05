@@ -12,7 +12,7 @@ The integration tests will require the following:
 ### Users
 You will need valid user accounts with the appropriate permissions for the endpoints they are executing.
 
-If you are testing permission bounderies then you should set up multiple users with different permissions.
+If you are testing permission boundaries then you should set up multiple users with different permissions.
 
 
 ### Subscriptions
@@ -44,8 +44,8 @@ from aplos_nca_saas_sdk.integration_testing.integration_test_configurations impo
 def main():
     """This is an example on how you can run the unit tests"""
 
-    # Optionally use our convient Environment Services loader
-    # which can help during intial testings.
+    # Optionally use our convenient Environment Services loader
+    # which can help during initial testings.
     evs: EnvironmentServices = EnvironmentServices()
     # See if we have a local .env, .env.uat, etc configured to look up
     # for local configuration settings
@@ -83,7 +83,7 @@ def main():
 ### Configs
 Tests are run based on configurations.  The following is an example of supported configurations:
 
-- Appliction Configuration Settings
+- Application Configuration Settings
 - Logins & Access
 - Executing an Analysis
 - Running a Validation

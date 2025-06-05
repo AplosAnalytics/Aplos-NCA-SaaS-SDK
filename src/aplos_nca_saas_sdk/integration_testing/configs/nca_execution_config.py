@@ -34,6 +34,12 @@ class NCAExecutionConfig(ConfigBase):
         meta_data: str | dict | None = None,
         output_dir: str | None = None,
         unzip_after_download: bool = False,
+        data_processing: str | dict | None = None,
+        post_processing: str | dict | None = None,
+        full_payload: str | dict | None = None,
+        wait_for_results: bool = True,
+        max_wait_in_seconds: int = 600,
+        enabled: bool = True
     ):
         super().__init__()
 
@@ -52,6 +58,12 @@ class NCAExecutionConfig(ConfigBase):
         self.__meta_data = meta_data
         self.__output_dir = output_dir
         self.__unzip_after_download = unzip_after_download
+        self.__data_processing = data_processing
+        self.__post_processing = post_processing
+        self.__full_payload = full_payload
+        self.wait_for_results = wait_for_results
+        self.max_wait_in_seconds = max_wait_in_seconds
+        self.enabled = enabled
 
     @property
     def login(self) -> LoginConfig:
@@ -83,6 +95,20 @@ class NCAExecutionConfig(ConfigBase):
         """Indicates if the download should be unzipped"""
         return self.__unzip_after_download
 
+    @property
+    def data_processing(self) -> str | Dict[str, Any] | None:
+        """Pre Processing"""
+        return self.__data_processing
+    
+    @property
+    def post_processing(self) -> str | Dict[str, Any] | None:
+        """Post Processing"""
+        return self.__post_processing
+    
+    @property
+    def full_payload(self) -> str | Dict[str, Any] | None:
+        """Full Payload"""
+        return self.__full_payload
 
 class NCAExecutionConfigs(ConfigBase):
     """
@@ -106,21 +132,31 @@ class NCAExecutionConfigs(ConfigBase):
         input_file_path: str,
         config_data: dict,
         meta_data: str | dict | None = None,
+        data_processing: str | dict | None = None,
+        post_processing: str | dict | None = None,
         output_dir: str | None = None,
         unzip_after_download: bool = False,
         enabled: bool = True,
+        full_payload: str | dict | None = None,
+        wait_for_results: bool = True,
+        max_wait_in_seconds: int = 600
     ):
         """Add an NCA Execution Config"""
-        nca_excution_config = NCAExecutionConfig(
+        nca_execution_config = NCAExecutionConfig(
             login,
             input_file_path,
             config_data,
             meta_data,
             output_dir,
             unzip_after_download,
+            data_processing,
+            post_processing,
+            full_payload,
+            wait_for_results=wait_for_results,
+            max_wait_in_seconds=max_wait_in_seconds
         )
-        nca_excution_config.enabled = enabled
-        self.__nca_executions.append(nca_excution_config)
+        nca_execution_config.enabled = enabled
+        self.__nca_executions.append(nca_execution_config)
 
     def load(self, test_config: Dict[str, Any]):
         """Loads the NCA Execution configs from a list of dictionaries"""
@@ -150,41 +186,64 @@ class NCAExecutionConfigs(ConfigBase):
             if not login:
                 raise RuntimeError("Failed to load the login configuration")
 
+
+            full_payload = self.__load_dictionary_data_or_file(key="payload", analysis=analysis, optional=True)
+            config_data = self.__load_dictionary_data_or_file(key="config", analysis=analysis, optional=True)
+
+            if not config_data and not full_payload:
+                raise RuntimeError("Failed to load the config data")
+
+            meta_data = self.__load_dictionary_data_or_file(key="meta", analysis=analysis, optional=True)
+            data_cleaning = self.__load_dictionary_data_or_file(key="data_cleaning", analysis=analysis, optional=True)
+            post_processing = self.__load_dictionary_data_or_file(key="post_processing", analysis=analysis, optional=True) 
+            wait_for_results =str(analysis.get("wait_for_results", True)).lower() == "true"
+            max_wait_in_seconds = int(analysis.get("max_wait_in_seconds", 600))
+
             self.add(
                 login=login,
                 input_file_path=analysis["file"],
-                config_data=self.__load_config_data(analysis=analysis),
-                meta_data=self.__load_meta_data(analysis=analysis),
+                config_data=config_data,
+                meta_data=meta_data,
                 output_dir=output_dir,
                 unzip_after_download=True,
                 enabled=enabled,
+                full_payload=full_payload,
+                data_processing=data_cleaning,
+                post_processing=post_processing,
+                wait_for_results=wait_for_results,
+                max_wait_in_seconds=max_wait_in_seconds
             )
 
-    def __load_meta_data(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
+
+    def __load_dictionary_data_or_file(self, key: str, analysis: Dict[str, Any], optional: bool = False ) -> Dict[str, Any] | None:
         data: Dict[str, Any] = {}
-        data = analysis.get("meta", {}).get("data", {})
+        data = analysis.get(key, {}).get("data", {})
 
-        return data
+        if data:
+            return data
 
-    def __load_config_data(self, analysis: Dict[str, Any]) -> Dict[str, Any]:
-        config_data: Dict[str, Any] = {}
-        config_data = analysis.get("config", {}).get("data")
-
-        if config_data:
-            return config_data
-
-        config_file_path: str = analysis.get("config", {}).get("file")
+        file_path: str = analysis.get(key, {}).get("file")
 
         logger.info(
             {
-                "message": "Initializing config_data from file",
-                "config_data": config_file_path,
+                "message": f"Initializing {key} from file",
+                "key": key,
+                "file_path": file_path,
             }
         )
-        config_path = FileUtility.load_filepath(config_file_path)
-        if os.path.exists(config_path) is False:
-            raise RuntimeError(f"Config file not found: {config_path}")
-        with open(config_path, "r", encoding="utf-8") as f:
-            config_data = json.load(f)
+        if not file_path:
+            if optional:
+                return None
+            raise RuntimeError(f"Data for {key} not found: {file_path}")
+        
+        path = FileUtility.load_filepath(file_path)
+        if os.path.exists(path) is False:
+            if optional:
+                return None
+            raise RuntimeError(f"Data for {key} not found: {path}")
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
 
-        return config_data
+        return data
+
+    

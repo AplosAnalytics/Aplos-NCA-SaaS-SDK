@@ -48,7 +48,7 @@ def main():
 
         wait_for_results = True
         max_wait_in_seconds = 900  # 15 minutes
-        resutls = analysis_api.execute(
+        results = analysis_api.execute(
             username=str(args.username),
             password=str(args.password),
             input_file_path=str(args.analysis_file),
@@ -60,7 +60,7 @@ def main():
         )
 
         if not wait_for_results:
-            exec_id = resutls.get("execution", {}).get("execution_id", "")
+            exec_id = results.get("execution", {}).get("execution_id", "")
             print(
                 "Analysis execution has been queued.  We're not waiting for the results."
             )
@@ -69,7 +69,7 @@ def main():
         print("🙌 Thank you for using the NCA API for an Analysis Execution Demo. 🙌")
     except Exception as e:  # pylint: disable=w0718
         print(
-            "🚨 An error occured ... exiting with an error.  Please check your settings and try again."
+            "🚨 An error occurred ... exiting with an error.  Please check your settings and try again."
         )
         print(
             "If you believe this is bug please create a support ticket and include the execution id (if available)."
@@ -83,7 +83,7 @@ def main():
 
 def optional_json_loads(data: str | dict) -> str | dict:
     """
-    Attempts to load the data as json, fails gracefull and retuns the data is if it fails
+    Attempts to load the data as json, fails graceful and returns the data is if it fails
     Args:
         data (str): data as string
 

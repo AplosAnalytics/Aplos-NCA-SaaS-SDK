@@ -39,7 +39,7 @@ class CommandlineArgs:
             "-c", "--config-file", required=False, help="Path to the configuration file"
         )
         self.parser.add_argument(
-            "-f", "--analyis-file", required=False, help="Path to the analysis file"
+            "-f", "--analysis-file", required=False, help="Path to the analysis file"
         )
         self.parser.add_argument(
             "-m", "--metadata-file", required=False, help="Path to the metadata file"
@@ -82,7 +82,7 @@ class CommandlineArgs:
         self.password: str | None = None
         self.host: str | None = None
 
-        # excuction setup
+        # execution setup
         self.config_file: str | None = None
         self.config_file_default: str | None = None
         self.analysis_file: str | None = None
@@ -102,21 +102,21 @@ class CommandlineArgs:
         Returns:
             bool: True if they are all valid
         """
-        # see if we have any aruments
+        # see if we have any arguments
         args = self.parser.parse_args()
 
         self.username = args.username
         self.password = args.password
         self.config_file = args.config_file
         # anything with a dash (in the args) is accessed with an underscore
-        self.analysis_file = args.analyis_file
+        self.analysis_file = args.analysis_file
         self.host = args.host
 
         self.metadata_file = args.metadata_file
         self.skip = args.skip
         self.output_directory = args.output_directory
         self.environment_file = args.environment_file
-        # no args check to see if they have them in the environmet
+        # no args check to see if they have them in the environment
 
         # if we have an environment file we'll want to load it before checking any defaults
         self.check_for_environment_config()
@@ -258,9 +258,9 @@ class CommandlineArgs:
         self, starting_path: str, file_name: str, raise_error_if_not_found: bool = True
     ) -> str | None:
         """Searches the project directory structor for a file"""
-        parents = 10
+        
         starting_path = starting_path or __file__
-
+        parents = len(starting_path.split(os.sep)) -1
         paths: List[str] = []
         for parent in range(parents):
             path = Path(starting_path).parents[parent].absolute()

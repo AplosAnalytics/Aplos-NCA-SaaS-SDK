@@ -41,13 +41,16 @@ class NCAAnalysis(NCAApiBaseClass):
         config_data: dict,
         *,
         meta_data: str | dict | None = None,
+        post_processing: str | dict | None = None,
+        data_processing: str | dict | None = None,
         wait_for_results: bool = True,
         max_wait_in_seconds: int = 900,
         output_directory: str | None = None,
         unzip_after_download: bool = False,
+        full_payload: str | dict | None = None
     ) -> Dict[str, Any]:
         """
-        Executes an analsysis.
+        Executes an analysis.
             - Uploads an analysis file.
             - Adds the execution to the queue.
 
@@ -81,11 +84,14 @@ class NCAAnalysis(NCAApiBaseClass):
                 "Unexpected empty file_id when attempting to upload file."
             )
 
-        self.log("\tAdding analyis to the queue.")
+        self.log("\tAdding analysis to the queue.")
         execution_response: Dict[str, Any] = self.__add_to_queue(
             file_id=file_id,
             config_data=config_data,
             meta_data=meta_data,
+            post_processing=post_processing,
+            data_processing=data_processing,
+            full_payload=full_payload
         )
 
         execution_id: str = execution_response.get("execution_id", "")
@@ -122,7 +128,8 @@ class NCAAnalysis(NCAApiBaseClass):
                 response["results"]["file"] = file_path
         else:
             self.log("Bypassed results download.")
-
+            response["results"]["status_code"] = 201
+            response["results"]["message"] = "Waiting for results download bypassed. Running Fast Executions."
         return response
 
     def __add_to_queue(
@@ -130,6 +137,9 @@ class NCAAnalysis(NCAApiBaseClass):
         file_id: str,
         config_data: dict,
         meta_data: str | dict | None = None,
+        post_processing: str | dict | None = None,
+        data_processing: str | dict | None = None,
+        full_payload: str | dict | None = None
     ) -> Dict[str, Any]:
         """
         Adds the analysis to the execution queue.
@@ -151,15 +161,21 @@ class NCAAnalysis(NCAApiBaseClass):
                 "Missing config_data.  Please provide a valid config_data."
             )
         headers = self.authenticator.get_jwt_http_headers()
-        # to start a new execution we need the location of the file (s3 bucket and object key)
-        # you basic configuration
-        # optional meta data
+        
+        submission: Dict[str, Any] = {}
 
-        submission = {
-            "file": {"id": file_id},
-            "configuration": config_data,
-            "meta_data": meta_data,
-        }
+        if full_payload:
+            submission = full_payload
+            # we still need to add the file id at this point
+            submission["file"] = {"id": file_id}
+        else:
+            submission = {
+                "file": {"id": file_id},
+                "configuration": config_data,
+                "meta_data": meta_data,
+                "post_processing": post_processing,
+                "data_processing": data_processing
+            }
 
         response: requests.Response = requests.post(
             self.endpoints.executions,
@@ -171,13 +187,13 @@ class NCAAnalysis(NCAApiBaseClass):
 
         if response.status_code == 403:
             raise PermissionError(
-                "Failed to execute.  A 403 response occured.  "
+                "Failed to execute.  A 403 response occurred.  "
                 "This could a token issue or a url path issue  "
                 "By default unknown gateway calls return 403 errors. "
             )
         elif response.status_code != 200:
             raise RuntimeError(
-                f"Unknown Error occured during executions: {response.status_code}. "
+                f"Unknown Error occurred during executions: {response.status_code}. "
                 f"Reason: {response.reason}"
             )
 

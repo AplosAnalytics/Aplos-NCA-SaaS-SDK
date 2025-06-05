@@ -17,13 +17,13 @@ class LoginConfig(ConfigBase):
     def __init__(
         self,
         username: Optional[str] = None,
-        passord: Optional[str] = None,
+        password: Optional[str] = None,
         host: Optional[str] = None,
         roles: Optional[List[str]] = None,
     ):
         super().__init__()
         self.__username: Optional[str] = username
-        self.__password: Optional[str] = passord
+        self.__password: Optional[str] = password
         self.__host: Optional[str] = host
         self.__roles: List[str] = roles if roles is not None else []
 
@@ -110,7 +110,7 @@ class LoginConfigs(ConfigBase):
 
     @staticmethod
     def try_load_login(login_config: Dict[str, Any]) -> LoginConfig | None:
-        """Attempts to intialize a Login from a configuration object"""
+        """Attempts to initialize a Login from a configuration object"""
         login: LoginConfig | None = None
         if login_config is not None:
             username = login_config.get("username", None)
