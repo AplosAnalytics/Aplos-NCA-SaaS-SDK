@@ -194,7 +194,7 @@ class NCAExecutionConfigs(ConfigBase):
                 raise RuntimeError("Failed to load the config data")
 
             meta_data = self.__load_dictionary_data_or_file(key="meta", analysis=analysis, optional=True)
-            data_cleaning = self.__load_dictionary_data_or_file(key="data_cleaning", analysis=analysis, optional=True)
+            data_cleaning = self.__load_dictionary_data_or_file(key="data_processing", analysis=analysis, optional=True)
             post_processing = self.__load_dictionary_data_or_file(key="post_processing", analysis=analysis, optional=True) 
             wait_for_results =str(analysis.get("wait_for_results", True)).lower() == "true"
             max_wait_in_seconds = int(analysis.get("max_wait_in_seconds", 600))
