@@ -7,7 +7,6 @@ packages = ["src/aplos_nca_saas_sdk"]
 
 [project]
 name = "aplos_nca_saas_sdk"
-source = "src/aplos_nca_saas_sdk"
 keywords = [
     "PK Analysis",
     "Pharmacokinetics",
@@ -26,7 +25,7 @@ keywords = [
     "Clinical Trials"
 ]
 
-version = "0.0.21"
+version = "0.0.23"
 authors = [
   { name="Eric Wilson", email="eric.wilson@aplosanalytics.com" }
 ]
