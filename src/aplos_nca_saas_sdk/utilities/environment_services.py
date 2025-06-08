@@ -9,7 +9,7 @@ import json
 from typing import Dict, List, Any
 from pathlib import Path
 from dotenv import load_dotenv
-
+from aplos_nca_saas_sdk.utilities.file_utility import FileUtility
 
 class EnvironmentServices:
     """Environment Services"""
@@ -26,8 +26,9 @@ class EnvironmentServices:
 
         if not starting_path:
             starting_path = __file__
-
-        environment_file: str | None = self.find_file(
+        fu: FileUtility = FileUtility()
+        
+        environment_file: str | None = fu.find_file(
             starting_path=starting_path,
             file_name=file_name,
             raise_error_if_not_found=raise_error_if_not_found,
@@ -57,29 +58,7 @@ class EnvironmentServices:
 
         return event
 
-    def find_file(
-        self, starting_path: str, file_name: str, raise_error_if_not_found: bool = True
-    ) -> str | None:
-        """Searches the project directory structure for a file"""
-        
-        starting_path = starting_path or __file__
-        parents = len(starting_path.split(os.sep)) -1
-        paths: List[str] = []
-        for parent in range(parents):
-            path = Path(starting_path).parents[parent].absolute()
-
-            tmp = os.path.join(path, file_name)
-            paths.append(tmp)
-            if os.path.exists(tmp):
-                return tmp
-
-        if raise_error_if_not_found:
-            searched_paths = "\n".join(paths)
-            raise RuntimeError(
-                f"Failed to locate environment file: {file_name} in: \n {searched_paths}"
-            )
-
-        return None
+    
 
     def find_module_path(
         self,

@@ -15,7 +15,7 @@ def main():
     """build the artifacts"""
     project_root = Path(__file__).parents[2]
 
-    # extact the version
+    # extract the version
     pyproject_toml = os.path.join(project_root, "pyproject.toml")
     version_file = os.path.join(project_root, "src", "aplos_nca_saas_sdk", "version.py")
 
@@ -72,7 +72,7 @@ def extract_version_and_write_to_file(pyproject_toml: str, version_file: str):
 
 def run_build():
     """Run python build commands"""
-    run_commands(["python", "-m", "build"])
+    output = run_commands(["python", "-m", "build"], capture_output=True)
 
 
 def run_publish():
@@ -104,7 +104,7 @@ def get_url(payload: str):
 
 def run_commands(
     commands: List[str], capture_output: bool = False, env=None
-) -> str | None:
+) -> str | int | None:
     """centralized area for running process commands"""
     try:
         # Run the publish command
@@ -113,16 +113,39 @@ def run_commands(
             check=True,
             capture_output=capture_output,
             env=env,  # pass any environment vars
+            # capture errors
+            stderr=subprocess.PIPE if not capture_output else None,
+            # capture output
+            stdout=subprocess.PIPE if not capture_output else None,
+            text=True,
         )
 
-        if capture_output:
-            output = result.stdout.decode().strip()
-            print(output)
-            return output
+        # if capture_output:
+        output = str(result.stdout)
+        print(output)
+        return output
 
     except subprocess.CalledProcessError as e:
         logger.exception(f"An error occurred: {e}")
-
+        if e.stderr:
+            error = str(e.stderr)
+            if "401 Error" in error:
+                logger.error("401 Error: Invalid credentials")
+                if "amazonaws" in error:
+                    logger.error(
+                        "Please check your AWS credentials and try again."
+                    )
+                    print("🚨 If you this package doesn't use aws code artifact, check your pip config file "
+                          "and remove the aws code artifact reference "
+                          "mac: ~./.config/pip/pip.conf"
+                          )
+                else:
+                    logger.error(
+                        "Please check your PYPI_API_TOKEN environment variable."
+                    )   
+                
+                logger.error("If you need help, please contact support.")
+        return e.returncode
 
 if __name__ == "__main__":
     main()

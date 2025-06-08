@@ -3,5 +3,5 @@ boto3
 python-dotenv # load env values
 PyJWT # jwt in the imports
 requests
-boto3-stubs[cognito]
+boto3-stubs
 mypy_boto3_cognito_idp
