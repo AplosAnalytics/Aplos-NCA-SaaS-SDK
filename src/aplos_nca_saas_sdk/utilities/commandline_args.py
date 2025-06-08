@@ -13,7 +13,7 @@ from typing import List
 from dotenv import load_dotenv
 
 from aplos_nca_saas_sdk.utilities.environment_vars import EnvironmentVars
-
+from aplos_nca_saas_sdk.utilities.file_utility import FileUtility
 # load the environment (.env) file if any
 # this may or may not be the desired results
 load_dotenv(override=True)
@@ -254,29 +254,7 @@ class CommandlineArgs:
 
         return user_input
 
-    def find_file(
-        self, starting_path: str, file_name: str, raise_error_if_not_found: bool = True
-    ) -> str | None:
-        """Searches the project directory structor for a file"""
-        
-        starting_path = starting_path or __file__
-        parents = len(starting_path.split(os.sep)) -1
-        paths: List[str] = []
-        for parent in range(parents):
-            path = Path(starting_path).parents[parent].absolute()
-
-            tmp = os.path.join(path, file_name)
-            paths.append(tmp)
-            if os.path.exists(tmp):
-                return tmp
-
-        if raise_error_if_not_found:
-            searched_paths = "\n".join(paths)
-            raise RuntimeError(
-                f"Failed to locate environment file: {file_name} in: \n {searched_paths}"
-            )
-
-        return None
+   
 
     def check_for_environment_config(self):
         """Attempts to load an environment file"""
@@ -287,7 +265,8 @@ class CommandlineArgs:
 
         if not env_file_path.exists():
             # Try to find the file
-            file = self.find_file(__file__, env_file_path.name)
+            fu: FileUtility = FileUtility()
+            file = fu.find_file(__file__, env_file_path.name)
             file_path = Path(str(file))
 
             if not file_path.exists():

@@ -1,3 +1,10 @@
 mypy
 pytest
 hypothesis
+pytest
+types-python-dateutil
+build
+toml
+twine
+wheel
+pkginfo
