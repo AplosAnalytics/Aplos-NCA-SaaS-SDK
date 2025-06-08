@@ -26,8 +26,7 @@ class EnvironmentServices:
 
         if not starting_path:
             starting_path = __file__
-        
-        
+
         environment_file: str | None = self.find_file(
             starting_path=starting_path,
             file_name=file_name,
@@ -58,17 +57,15 @@ class EnvironmentServices:
 
         return event
 
-    
-
     def find_module_path(
         self,
         starting_path: str | None = None,
         raise_error_if_not_found: bool = True,
     ) -> str | None:
         """From a given starting point, move up the directory chain until you find the modules root"""
-        
+
         starting_path = starting_path or __file__
-        parents = len(starting_path.split(os.sep)) -1
+        parents = len(starting_path.split(os.sep)) - 1
         MODULE_ROOT = "aplos_nca_saas_sdk"  # pylint: disable=c0103
         paths: List[str] = []
         for parent in range(parents):
@@ -92,9 +89,9 @@ class EnvironmentServices:
         self, starting_path: str, file_name: str, raise_error_if_not_found: bool = True
     ) -> str | None:
         """Searches the project directory structure for a file"""
-        
+
         starting_path = starting_path or __file__
-        parents = len(starting_path.split(os.sep)) -1
+        parents = len(starting_path.split(os.sep)) - 1
         paths: List[str] = []
         for parent in range(parents):
             try:
@@ -107,8 +104,7 @@ class EnvironmentServices:
             except Exception as e:
                 print(f"Error {str(e)}")
                 print(f"Failed to find the file: {file_name}.")
-                print(f'Searched: {"\n".join(paths)}.')
-                                
+                self.__print_paths(paths)
 
         if raise_error_if_not_found:
             searched_paths = "\n".join(paths)
@@ -117,3 +113,9 @@ class EnvironmentServices:
             )
 
         return None
+
+    def __print_paths(self, paths: List[str]):
+        """Prints the paths"""
+        print("Searched Paths:")
+        for path in paths:
+            print(f"\t{path}")
