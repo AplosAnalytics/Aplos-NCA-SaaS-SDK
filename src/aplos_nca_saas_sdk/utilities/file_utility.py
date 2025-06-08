@@ -5,8 +5,6 @@ Property of Aplos Analytics, Utah, USA
 """
 
 import os
-from pathlib import Path
-from typing import List
 
 from aplos_nca_saas_sdk.utilities.environment_services import EnvironmentServices
 
@@ -39,27 +37,5 @@ class FileUtility:
     ) -> str | None:
         """Searches the project directory structure for a file"""
         
-        starting_path = starting_path or __file__
-        parents = len(starting_path.split(os.sep)) -1
-        paths: List[str] = []
-        for parent in range(parents):
-            try:
-                path = Path(starting_path).parents[parent].absolute()
-
-                tmp = os.path.join(path, file_name)
-                paths.append(tmp)
-                if os.path.exists(tmp):
-                    return tmp
-            except Exception as e:
-                print(f"Error {str(e)}")
-                print(f"Failed to find the file: {file_name}.")
-                print(f'Searched: {"\n".join(path)}.')
-                                
-
-        if raise_error_if_not_found:
-            searched_paths = "\n".join(paths)
-            raise RuntimeError(
-                f"Failed to locate environment file: {file_name} in: \n {searched_paths}"
-            )
-
-        return None
+        es: EnvironmentServices = EnvironmentServices()
+        return es.find_file(starting_path, file_name, raise_error_if_not_found)
