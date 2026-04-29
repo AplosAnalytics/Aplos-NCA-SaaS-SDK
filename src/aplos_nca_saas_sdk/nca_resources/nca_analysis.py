@@ -33,6 +33,35 @@ class NCAAnalysis(NCAApiBaseClass):
 
         self.verbose: bool = False
 
+    # ------------------------------------------------------------------
+    # V3 helpers
+    # ------------------------------------------------------------------
+
+    def _get_v3_url(
+        self,
+        operation: str,
+        *,
+        resource_id: str | None = None,
+        sub_resource: str | None = None,
+    ) -> str:
+        """Build a v3 endpoint URL via the router strategy."""
+        return self.router.strategy.get_endpoint_url(
+            operation,
+            host=self.host,
+            tenant_id=self.authenticator.cognito.tenant_id,
+            user_id=self.authenticator.cognito.user_id,
+            resource_id=resource_id,
+            sub_resource=sub_resource,
+        )
+
+    def _process_v3_response(self, response_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Unwrap a v3 diagnostic envelope via the router strategy."""
+        return self.router.strategy.process_response(response_data)
+
+    # ------------------------------------------------------------------
+    # Existing public API (preserved)
+    # ------------------------------------------------------------------
+
     def execute(
         self,
         username: str,
@@ -144,9 +173,11 @@ class NCAAnalysis(NCAApiBaseClass):
         """
         Adds the analysis to the execution queue.
 
+        For v3, submits to the ``analysis_queue`` endpoint and processes
+        the response through the diagnostic envelope handler.
+
         Args:
-            bucket_name (str): s3 bucket name for your organization. this is returned to you
-            object_key (str): 3s object key for the file you are running an analysis on.
+            file_id (str): the uploaded file id
             config_data (dict): the config_data for the analysis file
             meta_data (str | dict): Optional.  Any meta data you'd like attached to this execution
         Returns:
@@ -161,7 +192,7 @@ class NCAAnalysis(NCAApiBaseClass):
                 "Missing config_data.  Please provide a valid config_data."
             )
         headers = self.authenticator.get_jwt_http_headers()
-        
+
         submission: Dict[str, Any] = {}
 
         if full_payload:
@@ -177,8 +208,14 @@ class NCAAnalysis(NCAApiBaseClass):
                 "data_processing": data_processing
             }
 
+        # Route to v3 analysis_queue endpoint when api_version is "v3"
+        if self.api_version == "v3":
+            url = self._get_v3_url("analysis_queue")
+        else:
+            url = self.endpoints.executions
+
         response: requests.Response = requests.post(
-            self.endpoints.executions,
+            url,
             headers=headers,
             data=json.dumps(submission),
             timeout=30,
@@ -197,6 +234,10 @@ class NCAAnalysis(NCAApiBaseClass):
                 f"Reason: {response.reason}"
             )
 
+        # Process v3 response through diagnostic envelope handler
+        if self.api_version == "v3":
+            json_response = self._process_v3_response(json_response)
+
         execution_id = str(json_response.get("execution_id"))
 
         self.log(f"\tExecution {execution_id} started.")
@@ -207,7 +248,11 @@ class NCAAnalysis(NCAApiBaseClass):
         self, execution_id: str, max_wait_in_seconds: float = 900
     ) -> str | None:
         """
-        Wait for results
+        Wait for results.
+
+        For v3, polls the ``execution_status`` endpoint and processes
+        responses through the diagnostic envelope handler.
+
         Args:
             execution_id (str): the analysis execution id
 
@@ -215,7 +260,10 @@ class NCAAnalysis(NCAApiBaseClass):
             str | None: on success: a url for download, on failure: None
         """
 
-        url = f"{self.endpoints.execution(execution_id)}"
+        if self.api_version == "v3":
+            url = self._get_v3_url("execution_status", resource_id=execution_id)
+        else:
+            url = f"{self.endpoints.execution(execution_id)}"
 
         headers = HttpUtilities.get_headers(self.authenticator.cognito.jwt)
         current_time = datetime.now()
@@ -229,6 +277,11 @@ class NCAAnalysis(NCAApiBaseClass):
         while not complete:
             response = requests.get(url, headers=headers, timeout=30)
             json_response: dict = response.json()
+
+            # Process v3 response through diagnostic envelope handler
+            if self.api_version == "v3":
+                json_response = self._process_v3_response(json_response)
+
             status = json_response.get("status")
             complete = status == "complete"
             elapsed = (
@@ -308,6 +361,196 @@ class NCAAnalysis(NCAApiBaseClass):
         self.log(f"\t\tResults are available in: {output_directory}")
 
         return output_file
+
+    # ------------------------------------------------------------------
+    # V3 execution operations
+    # ------------------------------------------------------------------
+
+    def execution_status(self, execution_id: str) -> Dict[str, Any]:
+        """Retrieve execution status (v3).
+
+        Calls ``/v3/tenants/{tenant_id}/users/{user_id}/executions/{execution_id}/status``.
+
+        Args:
+            execution_id: The execution identifier.
+
+        Returns:
+            The (unwrapped) status response.
+        """
+        url = self._get_v3_url("execution_status", resource_id=execution_id)
+        headers = HttpUtilities.get_headers(self.authenticator.cognito.jwt)
+        response = requests.get(url, headers=headers, timeout=30)
+
+        if response.status_code == 403:
+            raise PermissionError("403 Forbidden when retrieving execution status.")
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"Failed to get execution status: {response.status_code}. "
+                f"Reason: {response.reason}"
+            )
+
+        return self._process_v3_response(response.json())
+
+    def execution_config(self, execution_id: str) -> Dict[str, Any]:
+        """Retrieve execution configuration (v3).
+
+        Calls ``/v3/tenants/{tenant_id}/users/{user_id}/executions/{execution_id}/config``.
+
+        Args:
+            execution_id: The execution identifier.
+
+        Returns:
+            The (unwrapped) config response.
+        """
+        url = self._get_v3_url("execution_config", resource_id=execution_id)
+        headers = HttpUtilities.get_headers(self.authenticator.cognito.jwt)
+        response = requests.get(url, headers=headers, timeout=30)
+
+        if response.status_code == 403:
+            raise PermissionError("403 Forbidden when retrieving execution config.")
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"Failed to get execution config: {response.status_code}. "
+                f"Reason: {response.reason}"
+            )
+
+        return self._process_v3_response(response.json())
+
+    def execution_outputs_package(self, execution_id: str) -> Dict[str, Any]:
+        """Retrieve execution outputs package (v3).
+
+        Calls ``/v3/tenants/{tenant_id}/users/{user_id}/executions/{execution_id}/outputs/package``.
+
+        Args:
+            execution_id: The execution identifier.
+
+        Returns:
+            The (unwrapped) outputs package response.
+        """
+        url = self._get_v3_url("execution_outputs_package", resource_id=execution_id)
+        headers = HttpUtilities.get_headers(self.authenticator.cognito.jwt)
+        response = requests.get(url, headers=headers, timeout=30)
+
+        if response.status_code == 403:
+            raise PermissionError("403 Forbidden when retrieving outputs package.")
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"Failed to get execution outputs package: {response.status_code}. "
+                f"Reason: {response.reason}"
+            )
+
+        return self._process_v3_response(response.json())
+
+    def execution_outputs_report(self, execution_id: str) -> Dict[str, Any]:
+        """Retrieve execution outputs report (v3).
+
+        Calls ``/v3/tenants/{tenant_id}/users/{user_id}/executions/{execution_id}/outputs/report``.
+
+        Args:
+            execution_id: The execution identifier.
+
+        Returns:
+            The (unwrapped) outputs report response.
+        """
+        url = self._get_v3_url("execution_outputs_report", resource_id=execution_id)
+        headers = HttpUtilities.get_headers(self.authenticator.cognito.jwt)
+        response = requests.get(url, headers=headers, timeout=30)
+
+        if response.status_code == 403:
+            raise PermissionError("403 Forbidden when retrieving outputs report.")
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"Failed to get execution outputs report: {response.status_code}. "
+                f"Reason: {response.reason}"
+            )
+
+        return self._process_v3_response(response.json())
+
+    def execution_cancel(self, execution_id: str) -> Dict[str, Any]:
+        """Cancel an execution (v3).
+
+        Calls POST ``/v3/tenants/{tenant_id}/users/{user_id}/executions/{execution_id}/cancel``.
+
+        Args:
+            execution_id: The execution identifier.
+
+        Returns:
+            The (unwrapped) cancel response.
+        """
+        url = self._get_v3_url("execution_cancel", resource_id=execution_id)
+        headers = HttpUtilities.get_headers(self.authenticator.cognito.jwt)
+        response = requests.post(url, headers=headers, timeout=30)
+
+        if response.status_code == 403:
+            raise PermissionError("403 Forbidden when cancelling execution.")
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"Failed to cancel execution: {response.status_code}. "
+                f"Reason: {response.reason}"
+            )
+
+        return self._process_v3_response(response.json())
+
+    def execution_archive(self, execution_id: str) -> Dict[str, Any]:
+        """Archive an execution (v3).
+
+        Calls POST ``/v3/tenants/{tenant_id}/users/{user_id}/executions/{execution_id}/archive``.
+
+        Args:
+            execution_id: The execution identifier.
+
+        Returns:
+            The (unwrapped) archive response.
+        """
+        url = self._get_v3_url("execution_archive", resource_id=execution_id)
+        headers = HttpUtilities.get_headers(self.authenticator.cognito.jwt)
+        response = requests.post(url, headers=headers, timeout=30)
+
+        if response.status_code == 403:
+            raise PermissionError("403 Forbidden when archiving execution.")
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"Failed to archive execution: {response.status_code}. "
+                f"Reason: {response.reason}"
+            )
+
+        return self._process_v3_response(response.json())
+
+    def execution_output_by_type(
+        self, execution_id: str, output_type: str
+    ) -> Dict[str, Any]:
+        """Retrieve a specific execution output by type (v3).
+
+        Calls ``/v3/tenants/{tenant_id}/users/{user_id}/executions/{execution_id}/outputs/type/{output_type}``.
+
+        Args:
+            execution_id: The execution identifier.
+            output_type: The output type to retrieve.
+
+        Returns:
+            The (unwrapped) output response.
+        """
+        url = self._get_v3_url(
+            "execution_output_by_type",
+            resource_id=execution_id,
+            sub_resource=output_type,
+        )
+        headers = HttpUtilities.get_headers(self.authenticator.cognito.jwt)
+        response = requests.get(url, headers=headers, timeout=30)
+
+        if response.status_code == 403:
+            raise PermissionError("403 Forbidden when retrieving output by type.")
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"Failed to get execution output by type: {response.status_code}. "
+                f"Reason: {response.reason}"
+            )
+
+        return self._process_v3_response(response.json())
+
+    # ------------------------------------------------------------------
+    # Logging
+    # ------------------------------------------------------------------
 
     def log(self, message: str | Dict[str, Any]):
         """Log the message"""

@@ -7,9 +7,9 @@ packages = ["src/aplos_nca_saas_sdk"]
 
 [project]
 name = "aplos_nca_saas_sdk"
-source = "src/aplos_nca_saas_sdk"
 keywords = [
     "PK Analysis",
+    "Pharmacokinetic",
     "Pharmacokinetics",
     "Non-Compartmental Analysis",
     "NCA",
@@ -59,3 +59,10 @@ Homepage = "https://aplosanalytics.com/"
 Documentation = "https://docs.aplosanalytics.com/"
 Repository = "https://github.com/AplosAnalytics/Aplos-NCA-SaaS-SDK"
 Issues = "https://github.com/AplosAnalytics/Aplos-NCA-SaaS-SDK/issues"
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = [
+    "ignore::pytest.PytestCollectionWarning",
+]

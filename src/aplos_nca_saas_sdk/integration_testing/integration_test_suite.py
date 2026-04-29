@@ -36,7 +36,9 @@ class IntegrationTestSuite:
         self.test_results = []
 
         start_time: datetime = datetime.now(UTC)
-        factory: IntegrationTestFactory = IntegrationTestFactory()
+        factory: IntegrationTestFactory = IntegrationTestFactory(
+            api_version=test_config.api_version
+        )
         test: IntegrationTestBase | None = None
         for test in factory.test_instances:
             test.config = test_config

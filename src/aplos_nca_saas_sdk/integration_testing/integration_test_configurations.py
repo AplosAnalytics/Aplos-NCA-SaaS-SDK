@@ -34,6 +34,7 @@ class TestConfiguration:
         self.file_uploads: FileUploadConfigs = FileUploadConfigs()
         self.nca_executions: NCAExecutionConfigs = NCAExecutionConfigs()
         self.nca_validations: NCAValidationConfigs = NCAValidationConfigs()
+        self.api_version: str = "v1"
 
     def load(self, file_path: str):
         """
@@ -47,6 +48,7 @@ class TestConfiguration:
         with open(file_path, "r", encoding="utf-8") as f:
             config = json.load(f)
 
+        self.api_version = config.get("api_version", "v1")
         self.logins.load(config.get("login_test", {}))
         self.app_config.load(config.get("application_config_test", {}))
         self.file_uploads.load(config.get("file_upload_test", {}))

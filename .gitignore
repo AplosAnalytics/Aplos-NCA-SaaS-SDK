@@ -15,3 +15,9 @@ dist/
 # exclude any output generated
 .aplos-nca-output
 .output
+.kiro
+# Local configuration
+.pysetup.json
+
+activate.sh
+.hypothesis

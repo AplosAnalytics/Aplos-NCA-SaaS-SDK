@@ -26,6 +26,35 @@ class NCAFileDownload(NCAApiBaseClass):
     def __init__(self, host: str) -> None:
         super().__init__(host)
 
+    # ------------------------------------------------------------------
+    # V3 helpers
+    # ------------------------------------------------------------------
+
+    def _get_v3_url(
+        self,
+        operation: str,
+        *,
+        resource_id: str | None = None,
+        sub_resource: str | None = None,
+    ) -> str:
+        """Build a v3 endpoint URL via the router strategy."""
+        return self.router.strategy.get_endpoint_url(
+            operation,
+            host=self.host,
+            tenant_id=self.authenticator.cognito.tenant_id,
+            user_id=self.authenticator.cognito.user_id,
+            resource_id=resource_id,
+            sub_resource=sub_resource,
+        )
+
+    def _process_v3_response(self, response_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Unwrap a v3 diagnostic envelope via the router strategy."""
+        return self.router.strategy.process_response(response_data)
+
+    # ------------------------------------------------------------------
+    # Existing public API (preserved)
+    # ------------------------------------------------------------------
+
     def upload(
         self,
         input_file_path: str,
@@ -144,3 +173,82 @@ class NCAFileDownload(NCAApiBaseClass):
                 raise RuntimeError(error)
 
         return json_response
+
+    # ------------------------------------------------------------------
+    # V3 file operations
+    # ------------------------------------------------------------------
+
+    def file_download_url(self, file_id: str) -> Dict[str, Any]:
+        """Retrieve a download URL for a file (v3).
+
+        Calls GET ``/v3/tenants/{tenant_id}/users/{user_id}/files/{file_id}/download-url``.
+
+        Args:
+            file_id: The file identifier.
+
+        Returns:
+            The (unwrapped) download-url response.
+        """
+        url = self._get_v3_url("file_download_url", resource_id=file_id)
+        headers = HttpUtilities.get_headers(self.authenticator.cognito.jwt)
+        response = requests.get(url, headers=headers, timeout=30)
+
+        if response.status_code == 403:
+            raise PermissionError("403 Forbidden when retrieving file download URL.")
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"Failed to get file download URL: {response.status_code}. "
+                f"Reason: {response.reason}"
+            )
+
+        return self._process_v3_response(response.json())
+
+    def file_stream(self, file_id: str) -> Dict[str, Any]:
+        """Stream file content (v3).
+
+        Calls GET ``/v3/tenants/{tenant_id}/users/{user_id}/files/{file_id}/stream``.
+
+        Args:
+            file_id: The file identifier.
+
+        Returns:
+            The (unwrapped) file stream response.
+        """
+        url = self._get_v3_url("file_stream", resource_id=file_id)
+        headers = HttpUtilities.get_headers(self.authenticator.cognito.jwt)
+        response = requests.get(url, headers=headers, timeout=60)
+
+        if response.status_code == 403:
+            raise PermissionError("403 Forbidden when streaming file content.")
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"Failed to stream file: {response.status_code}. "
+                f"Reason: {response.reason}"
+            )
+
+        return self._process_v3_response(response.json())
+
+    def file_lineage(self, file_id: str) -> Dict[str, Any]:
+        """Retrieve file lineage (v3).
+
+        Calls GET ``/v3/tenants/{tenant_id}/users/{user_id}/files/{file_id}/lineage``.
+
+        Args:
+            file_id: The file identifier.
+
+        Returns:
+            The (unwrapped) file lineage response.
+        """
+        url = self._get_v3_url("file_lineage", resource_id=file_id)
+        headers = HttpUtilities.get_headers(self.authenticator.cognito.jwt)
+        response = requests.get(url, headers=headers, timeout=30)
+
+        if response.status_code == 403:
+            raise PermissionError("403 Forbidden when retrieving file lineage.")
+        if response.status_code != 200:
+            raise RuntimeError(
+                f"Failed to get file lineage: {response.status_code}. "
+                f"Reason: {response.reason}"
+            )
+
+        return self._process_v3_response(response.json())

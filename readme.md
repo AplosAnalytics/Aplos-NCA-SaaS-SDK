@@ -1,6 +1,6 @@
 # Aplos NCA SaaS SDK for python
 
-Welcome to the Aplos NCA SaaS SDK for automating your PK Analyis.  A secure set of API's to connect to our Cloud System and automate your PK analysis.
+Welcome to the Aplos NCA SaaS SDK for automating your PK Analysis.  A secure set of API's to connect to our Cloud System and automate your PK analysis.
 
 This SDK works for our
 - Trial Accounts (Multi Tenancy)

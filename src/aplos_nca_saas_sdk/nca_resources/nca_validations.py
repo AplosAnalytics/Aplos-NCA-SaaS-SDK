@@ -21,6 +21,35 @@ class NCAValidation(NCAApiBaseClass):
     def __init__(self, host: str) -> None:
         super().__init__(host)
 
+    # ------------------------------------------------------------------
+    # V3 helpers
+    # ------------------------------------------------------------------
+
+    def _get_v3_url(
+        self,
+        operation: str,
+        *,
+        resource_id: str | None = None,
+        sub_resource: str | None = None,
+    ) -> str:
+        """Build a v3 endpoint URL via the router strategy."""
+        return self.router.strategy.get_endpoint_url(
+            operation,
+            host=self.host,
+            tenant_id=self.authenticator.cognito.tenant_id,
+            user_id=self.authenticator.cognito.user_id,
+            resource_id=resource_id,
+            sub_resource=sub_resource,
+        )
+
+    def _process_v3_response(self, response_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Unwrap a v3 diagnostic envelope via the router strategy."""
+        return self.router.strategy.process_response(response_data)
+
+    # ------------------------------------------------------------------
+    # Existing public API (preserved)
+    # ------------------------------------------------------------------
+
     def execute(
         self,
         username: str,
@@ -40,7 +69,13 @@ class NCAValidation(NCAApiBaseClass):
         """
 
         self.authenticator.authenticate(username=username, password=password)
-        url = self.endpoints.validations
+
+        # Route to v3 validations endpoint when api_version is "v3"
+        if self.api_version == "v3":
+            url = self._get_v3_url("validations")
+        else:
+            url = self.endpoints.validations
+
         # no payload required
         headers = self.authenticator.get_jwt_http_headers()
         validation_post_response = requests.post(url, headers=headers, timeout=30)
@@ -52,13 +87,15 @@ class NCAValidation(NCAApiBaseClass):
             )
 
         response = {
-            "queued": validation_post_response.json(),
+            "queued": validation_post_response.json()
+            if self.api_version != "v3"
+            else self._process_v3_response(validation_post_response.json()),
             "results": None,
         }
 
         if wait_for_results:
             batch_id = (
-                validation_post_response.json().get("validation_batch", {}).get("id")
+                response["queued"].get("validation_batch", {}).get("id")
             )
 
             if not batch_id:
@@ -72,8 +109,16 @@ class NCAValidation(NCAApiBaseClass):
             # Add the timedelta to the current time
             max_time = current_time + time_delta
             while not completed:
+                # Route to v3 validation endpoint when api_version is "v3"
+                if self.api_version == "v3":
+                    validation_url = self._get_v3_url(
+                        "validation", resource_id=batch_id
+                    )
+                else:
+                    validation_url = self.endpoints.validation(batch_id=batch_id)
+
                 validation_get_response = requests.get(
-                    self.endpoints.validation(batch_id=batch_id),
+                    validation_url,
                     timeout=30,
                     headers=self.authenticator.get_jwt_http_headers(),
                 )
@@ -82,7 +127,14 @@ class NCAValidation(NCAApiBaseClass):
                         f"Failed to get validation results. Status Code: {validation_get_response.status_code}"
                         f"Reason: {validation_get_response.reason}"
                     )
-                status = validation_get_response.json().get("status")
+
+                json_response = validation_get_response.json()
+
+                # Process v3 response through diagnostic envelope handler
+                if self.api_version == "v3":
+                    json_response = self._process_v3_response(json_response)
+
+                status = json_response.get("status")
                 completed = status == "complete"
 
                 if not completed:
@@ -95,7 +147,7 @@ class NCAValidation(NCAApiBaseClass):
                     logger.info(f"waiting for results.... {status}")
                     time.sleep(15)
                 else:
-                    response["results"] = validation_get_response.json()
+                    response["results"] = json_response
 
         logger.info("Validation complete.")
         return response

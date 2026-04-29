@@ -4,9 +4,8 @@ All Rights Reserved.   www.aplosanalytics.com   LICENSED MATERIALS
 Property of Aplos Analytics, Utah, USA
 """
 
-from abc import ABC
 import os
-from typing import List
+from typing import List, Optional
 from pathlib import Path
 import importlib
 import inspect
@@ -19,10 +18,12 @@ from aplos_nca_saas_sdk.integration_testing.tests.file_upload_test import FileUp
 class IntegrationTestFactory:
     """
     Integration Test Factory
-    Loads all the integration tests from the tests directory and registers them for execution
+    Loads all the integration tests from the tests directory and registers them for execution.
+    Supports version-aware filtering: v3-prefixed test files only run when api_version == "v3".
     """
 
-    def __init__(self):
+    def __init__(self, api_version: Optional[str] = None):
+        self.__api_version: str = api_version or "v1"
         self.__test_classes: List[IntegrationTestBase] = []
         self.__load_all_classes()
 
@@ -38,6 +39,10 @@ class IntegrationTestFactory:
 
         # load the class dynamically
         for test_file in test_files:
+            # v3-prefixed test files only run when api_version is "v3"
+            if test_file.startswith("v3_") and self.__api_version != "v3":
+                continue
+
             module_name = (
                 f"aplos_nca_saas_sdk.integration_testing.tests.{test_file[:-3]}"
             )
@@ -52,6 +57,11 @@ class IntegrationTestFactory:
                 ):
                     # Instantiate the class and store it
                     self.register_test_instance(obj())
+
+    @property
+    def api_version(self) -> str:
+        """Get the API version used for test filtering"""
+        return self.__api_version
 
     @property
     def test_instances(self) -> List[IntegrationTestBase]:
