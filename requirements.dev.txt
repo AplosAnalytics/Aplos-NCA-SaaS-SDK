@@ -8,3 +8,10 @@ toml
 twine
 wheel
 pkginfo
+pytest
+types-python-dateutil
+build
+toml
+twine
+wheel
+pkginfo
