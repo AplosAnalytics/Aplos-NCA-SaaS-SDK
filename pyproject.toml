@@ -12,6 +12,10 @@ adopts = "-m 'not integration'"
 markers = [
     "integration: marks tests as integration (deselect with '-m \"not integration\"')"
 ]
+filterwarnings = [
+    "ignore::pytest.PytestCollectionWarning",
+]
+
 
 [project]
 name = "aplos_nca_saas_sdk"
@@ -69,8 +73,4 @@ Repository = "https://github.com/AplosAnalytics/Aplos-NCA-SaaS-SDK"
 Issues = "https://github.com/AplosAnalytics/Aplos-NCA-SaaS-SDK/issues"
 
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-filterwarnings = [
-    "ignore::pytest.PytestCollectionWarning",
-]
+
