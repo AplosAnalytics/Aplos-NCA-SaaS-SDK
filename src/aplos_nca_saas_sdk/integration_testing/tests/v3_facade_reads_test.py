@@ -33,7 +33,7 @@ class V3FacadeReadsTest(IntegrationTestBase):
     """
 
     def __init__(self):
-        super().__init__(name="v3-facade-reads", index=13)
+        super().__init__(name="v3-facade-reads", index=14)
 
     def test(self) -> bool:
         self.results.clear()
@@ -68,7 +68,9 @@ class V3FacadeReadsTest(IntegrationTestBase):
                     logger.info({"message": "facade: workflow.lineage", "id": exec_id})
                     client.workflow.lineage(exec_id)
                 else:
-                    logger.info({"message": "no executions; skipping status/root/lineage"})
+                    logger.info(
+                        {"message": "no executions; skipping status/root/lineage"}
+                    )
 
                 # --- tenant reads ---------------------------------------------------
                 logger.info({"message": "facade: tenants.get"})
@@ -79,21 +81,33 @@ class V3FacadeReadsTest(IntegrationTestBase):
                 try:
                     client.tenants.list()
                 except AplosApiError as e:
-                    logger.info({"message": "tenants.list not permitted/available", "code": e.code})
+                    logger.info(
+                        {
+                            "message": "tenants.list not permitted/available",
+                            "code": e.code,
+                        }
+                    )
 
                 # --- user reads -----------------------------------------------------
                 logger.info({"message": "facade: users.list"})
                 try:
                     client.users.list()
                 except AplosApiError as e:
-                    logger.info({"message": "users.list not permitted/available", "code": e.code})
+                    logger.info(
+                        {
+                            "message": "users.list not permitted/available",
+                            "code": e.code,
+                        }
+                    )
 
                 # --- subscription reads --------------------------------------------
                 logger.info({"message": "facade: subscriptions.active"})
                 try:
                     client.subscriptions.active()
                 except AplosApiError as e:
-                    logger.info({"message": "active subscription not available", "code": e.code})
+                    logger.info(
+                        {"message": "active subscription not available", "code": e.code}
+                    )
 
                 test_response.success = True
 
