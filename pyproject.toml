@@ -63,7 +63,13 @@ dependencies = [
   "boto3>=1.34.110",  
   "python-dotenv>=1.0.1",
   "PyJWT>=2.9.0",
-  "mypy_boto3_cognito_idp>=1.35.68"
+  "mypy_boto3_cognito_idp>=1.35.68",
+  # Transport for the generated typed client (src/.../_generated). See
+  # openapi/ and NE-1849-codegen-design.md. Coexists with requests during the
+  # facade transition.
+  "httpx>=0.23.0",
+  "attrs>=21.3.0",
+  "python-dateutil>=2.8.0"
 ]
 
 [project.urls]

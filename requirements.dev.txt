@@ -1,17 +1,12 @@
 mypy
 pytest
 hypothesis
-pytest
 types-python-dateutil
 build
 toml
 twine
 wheel
 pkginfo
-pytest
-types-python-dateutil
-build
-toml
-twine
-wheel
-pkginfo
+# Codegen for the typed transport client (see openapi/). Pinned for reproducible
+# generation. Not a runtime dependency.
+openapi-python-client==0.28.0

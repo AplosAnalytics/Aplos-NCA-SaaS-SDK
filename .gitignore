@@ -4,6 +4,8 @@ dist/
 .DS_Store
 .env
 *.pyc
+__pycache__/
+.ruff_cache/
 
 .coverage
 
@@ -21,3 +23,4 @@ dist/
 
 activate.sh
 .hypothesis
+.ruff_cache/

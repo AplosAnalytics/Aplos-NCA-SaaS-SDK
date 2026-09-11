@@ -1,0 +1,15 @@
+# Config for openapi-python-client — see NE-1849-codegen-design.md
+#
+# The generated client is the typed TRANSPORT layer. It is regenerated from
+# openapi/openapi-spec.json and MUST NOT be hand-edited. The public ergonomic
+# facade (AplosClient) lives outside the generated package.
+
+# Name the generated package. With --meta none and
+# --output-path src/aplos_nca_saas_sdk/_generated, this produces
+# src/aplos_nca_saas_sdk/_generated/aplos_api_client/...
+project_name_override: "_generated"
+package_name_override: "aplos_api_client"
+
+# Keep generated field names close to the wire (camelCase) but valid Python.
+# (openapi-python-client sanitizes to snake_case by default; the facade maps
+# curated method/param names, so generated internals can stay as-is.)
