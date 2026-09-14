@@ -24,3 +24,5 @@ __pycache__/
 activate.sh
 .hypothesis
 .ruff_cache/
+
+.pypirc
