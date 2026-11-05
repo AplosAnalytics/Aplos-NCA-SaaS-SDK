@@ -131,11 +131,15 @@ class CognitoAuthentication:
         self.__jwt = auth_response["AuthenticationResult"]["IdToken"]
         # access token is if you have direct access to aws resources
         # you probably won't ever need this
-        self.__access_token = auth_response["AuthenticationResult"]["AccessToken"]  # noqa: F814, F841, pylint: disable=W0612
+        self.__access_token = auth_response["AuthenticationResult"][
+            "AccessToken"
+        ]  # noqa: F814, F841, pylint: disable=W0612
         # refresh token if needed
         # you can use refresh tokens to "refresh" your jwt or simply login again
         # refresh tokens are typically good for 30 days by default
-        self.__refresh_token = auth_response["AuthenticationResult"]["RefreshToken"]  # noqa: F814, F841, pylint: disable=w0612
+        self.__refresh_token = auth_response["AuthenticationResult"][
+            "RefreshToken"
+        ]  # noqa: F814, F841, pylint: disable=w0612
 
         # return the jwt token
         if isinstance(self.__jwt, str):
@@ -151,9 +155,21 @@ class CognitoAuthentication:
         decoded_jwt: dict = jwt_lib.decode(
             encoded_jwt, options={"verify_signature": False}
         )
-        # custom fields contain information we'll need for later requests
-        self.__user_id = decoded_jwt.get("custom:aplos_user_id")
-        self.__tenant_id = decoded_jwt.get("custom:aplos_user_tenant_id")
+        # custom fields contain information we'll need for later requests.
+        #
+        # The platform now issues ``custom:user_id`` / ``custom:tenant_id`` and
+        # has retired ``custom:aplos_user_id`` / ``custom:aplos_user_tenant_id``,
+        # so the NEW claims are read first. The retired claims are kept only as a
+        # fallback: this SDK is a published client that can be pointed at any
+        # Aplos environment, and environments are upgraded at different times, so
+        # a token from a not-yet-upgraded environment may still carry only the
+        # retired claims. Drop the fallback once every environment is upgraded.
+        self.__user_id = decoded_jwt.get("custom:user_id") or decoded_jwt.get(
+            "custom:aplos_user_id"
+        )
+        self.__tenant_id = decoded_jwt.get("custom:tenant_id") or decoded_jwt.get(
+            "custom:aplos_user_tenant_id"
+        )
 
     @property
     def jwt(self) -> str:
